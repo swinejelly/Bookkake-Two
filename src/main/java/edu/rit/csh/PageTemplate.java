@@ -8,8 +8,8 @@ public class PageTemplate extends WebPage {
 	private static final long serialVersionUID = -6071606580892913447L;
 
 	public PageTemplate(final PageParameters parameters){
-		add(new Label("header", "HEADER"));
+		add(new Header("header"));
 		add(new Label("body", "BODY"));
-		add(new Label("footer", "FOOTER"));
+		add(new Footer("footer"));
 	}
 }
