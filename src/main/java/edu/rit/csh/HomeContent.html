@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+	<head>
+	</head>
+	<body>
+		<wicket:panel>
+		<h1>Welcome to Bookkake!</h1>
+		<div class="ui grid">
+			<div class="two wide column"></div>
+			<div class="eight wide column">
+				<h2 class="ui center aligned header">Your Books</h2>
+				<table class="ui table segment">
+					<thead>
+						<tr>
+							<th>Book</th>
+							<th>Availability</th>
+						</tr>
+					</thead>
+					<tr>
+						<td>Elements of Style</td>
+						<td>Available</td>
+					</tr>
+					<tr>
+						<td>Rise and Fall of the Roman Empire</td>
+						<td>Using</td>
+					</tr>
+				</table>		    
+		    </div>
+		    <div class="four wide column">
+				<h2 class="ui center aligned header">Actions</h2>		    
+		    </div>
+		    <div class="two wide column"></div>
+		</div>
+		<a wicket:id="ajaxLink">Click here to try AJAX!</a>
+	</wicket:panel>
+	</body>
+</html>
