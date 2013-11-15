@@ -6,8 +6,8 @@
 		<wicket:panel>
 		<h1>Welcome to Bookkake!</h1>
 		<div class="ui grid">
-			<div class="two wide column"></div>
-			<div class="eight wide column">
+			<div class="one wide column"></div>
+			<div class="nine wide column">
 				<h2 class="ui center aligned header">Your Books</h2>
 				<table class="ui table segment">
 					<thead>
@@ -25,11 +25,15 @@
 						<td>Using</td>
 					</tr>
 				</table>		    
+				<a wicket:id="addBookLink">Add Book</a>
 		    </div>
-		    <div class="four wide column">
-				<h2 class="ui center aligned header">Actions</h2>		    
+		    <div class="five wide column">
+				<h2 class="ui center aligned header">Actions</h2>
+				<div wicket:id="action">
+				
+				</div>		    
 		    </div>
-		    <div class="two wide column"></div>
+		    <div class="one wide column"></div>
 		</div>
 	</wicket:panel>
 	</body>
