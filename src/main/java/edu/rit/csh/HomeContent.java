@@ -29,7 +29,7 @@ public class HomeContent extends Panel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				//construct the new AddBookPanel
-				WebMarkupContainer actionPanel = new AddBookPanel("action");
+				WebMarkupContainer actionPanel = new SearchBookPanel("action");
 				actionPanel.setOutputMarkupId(true);
 				//Replace it in the page heirarchy
 				action.replaceWith(actionPanel);

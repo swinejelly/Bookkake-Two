@@ -2,14 +2,14 @@ package edu.rit.csh;
 
 import org.apache.wicket.markup.html.panel.Panel;
 
-public class AddBookPanel extends Panel {
+public class SearchBookPanel extends Panel {
 	private static final long serialVersionUID = 4461133275889450083L;
 	
-	private final AddBookForm form;
+	private final SearchBookForm form;
 
-	public AddBookPanel(String id) {
+	public SearchBookPanel(String id) {
 		super(id);
-		form = new AddBookForm("addBookForm");
+		form = new SearchBookForm("searchBookForm");
 		add(form);
 	}
 

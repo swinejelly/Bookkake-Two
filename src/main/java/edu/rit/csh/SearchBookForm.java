@@ -11,17 +11,17 @@ import org.apache.wicket.model.Model;
  * @author scott
  *
  */
-public class AddBookForm extends Form {
+public class SearchBookForm extends Form {
 	private static final long serialVersionUID = 8123125720433269221L;
 	
-	private final TextField isbn;
+	private final TextField title;
 
-	public AddBookForm(String id) {
+	public SearchBookForm(String id) {
 		super(id);
-		isbn = new TextField("isbn");
-		isbn.setDefaultModel(Model.of(""));
-		add(isbn);
-		setDefaultModel(new CompoundPropertyModel<AddBookForm>(this));
+		title = new TextField("title");
+		title.setDefaultModel(Model.of(""));
+		add(title);
+		setDefaultModel(new CompoundPropertyModel<SearchBookForm>(this));
 	}
 
 }
