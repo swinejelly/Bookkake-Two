@@ -10,17 +10,14 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 public class PageTemplate extends WebPage {
 	private static final long serialVersionUID = -6071606580892913447L;
 	
-	private final MarkupContainer header;
-	private final MarkupContainer body;
-	private final MarkupContainer footer;
-
+	private   final MarkupContainer header;
+	private   final MarkupContainer footer;
+	
 	@SuppressWarnings("serial")
-	public PageTemplate(final PageParameters parameters){
+	public PageTemplate(){
 		header = new Header("header");
-		body = new HomeContent("body");
 		footer = new Footer("footer");
 		add(header);
 		add(footer);
-		add(body);
 	}
 }
