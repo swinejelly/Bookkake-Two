@@ -97,6 +97,11 @@
 			<artifactId>hibernate-core</artifactId>
 			<version>4.2.7.Final</version>
 		</dependency>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20131018</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<resources>
