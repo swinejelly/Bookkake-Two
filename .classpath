@@ -98,4 +98,5 @@
       <attribute value="jar:file:/C:/Users/scott/.m2/repository/org/json/json/20131018/json-20131018-javadoc.jar!/" name="javadoc_location"/>
     </attributes>
   </classpathentry>
+  <classpathentry kind="var" path="M2_REPO/org/mockito/mockito-all/1.8.4/mockito-all-1.8.4.jar" sourcepath="M2_REPO/org/mockito/mockito-all/1.8.4/mockito-all-1.8.4-sources.jar"/>
 </classpath>
