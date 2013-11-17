@@ -31,6 +31,7 @@ public class SearchBookForm extends Form {
 		author = new TextField("author");
 		author.setDefaultModel(Model.of(""));
 		author.setLabel(Model.of("Author"));
+		author.setRequired(false);
 		add(author);
 		
 		submit = new Button("searchBookSubmit");
@@ -44,7 +45,9 @@ public class SearchBookForm extends Form {
 		String authorStr = (String)author.getDefaultModelObject();
 		PageParameters params = new PageParameters();
 		params.add("title", titleStr);
-		params.add("author", authorStr);
+		if (authorStr != null){
+			params.add("author", authorStr);
+		}
 		setResponsePage(PublicSearchResultsPage.class, params);
 	}
 

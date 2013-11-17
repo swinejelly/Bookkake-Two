@@ -6,17 +6,17 @@
 		<wicket:extend>
 			This is the PublicSearchResultsPage.
 			<br>
-			The title string was <label wicket:id="title"></label>.
-			The author string was <label wicket:id="author"></label>.
-			
+			The title string was <label wicket:id="title"></label>.<br>
+			The author string was <label wicket:id="author"></label>.<br>
+			The query returned <label wicket:id="numItems"></label>.<br>			
 			<label wicket:id="jsonResult"></label>
 			
-			<table class="ui table segment">
+			<table class="ui table segment" wicket:enclosure="books">
 				<thead>
 					<tr>
 						<th class="two wide">Cover</th>
-						<th class="six wide">Info</th>
-						<th class="eight wide">Description</th>
+						<th class="four wide">Info</th>
+						<th class="ten wide">Description</th>
 					</tr>
 				</thead>
 				<tbody>
