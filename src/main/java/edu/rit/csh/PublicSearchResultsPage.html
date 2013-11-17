@@ -7,6 +7,28 @@
 			This is the PublicSearchResultsPage.
 			<br>
 			The title string was <label wicket:id="title"></label>.
+			The author string was <label wicket:id="author"></label>.
+			
+			<label wicket:id="jsonResult"></label>
+			
+			<div wicket:id="books">
+				<div class="ui segment">
+					<div class="ui grid">
+						<div class="four wide column">
+							<img wicket:id="img"></img>
+						</div>
+						<div class="four wide column">
+							<h2 wicket:id="title"></h2>
+							<h3 wicket:id="authors"></h3>
+							<h4 wicket:id="publisher"></h4>
+						</div>
+						<div class="four wide column">
+							<p wicket:id="description"></p>
+						</div>
+					</div>
+				</div>
+				<br>
+			</div>
 		</wicket:extend>
 	</body>
 </html>
