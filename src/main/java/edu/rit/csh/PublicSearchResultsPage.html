@@ -11,24 +11,28 @@
 			
 			<label wicket:id="jsonResult"></label>
 			
-			<div wicket:id="books">
-				<div class="ui segment">
-					<div class="ui grid">
-						<div class="four wide column">
-							<img wicket:id="img"></img>
-						</div>
-						<div class="four wide column">
+			<table class="ui table segment">
+				<thead>
+					<tr>
+						<th class="two wide">Cover</th>
+						<th class="six wide">Info</th>
+						<th class="eight wide">Description</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr wicket:id="books">
+						<td><img wicket:id="img"></img></td>
+						<td>
 							<h2 wicket:id="title"></h2>
 							<h3 wicket:id="authors"></h3>
 							<h4 wicket:id="publisher"></h4>
-						</div>
-						<div class="four wide column">
-							<p wicket:id="description"></p>
-						</div>
-					</div>
-				</div>
-				<br>
-			</div>
+						</td>
+						<td wicket:id="description">
+						</td>
+					</tr>
+				</tbody>
+			</table>
+						
 		</wicket:extend>
 	</body>
 </html>
