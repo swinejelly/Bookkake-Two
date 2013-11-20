@@ -3,7 +3,9 @@ package edu.rit.csh.auth;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -12,6 +14,7 @@ import org.apache.directory.api.ldap.model.cursor.EntryCursor;
 import org.apache.directory.api.ldap.model.entry.Attribute;
 import org.apache.directory.api.ldap.model.entry.Entry;
 import org.apache.directory.api.ldap.model.exception.LdapException;
+import org.apache.directory.api.ldap.model.exception.LdapInvalidAttributeValueException;
 import org.apache.directory.api.ldap.model.message.SearchScope;
 import org.apache.directory.ldap.client.api.LdapConnection;
 import org.apache.directory.ldap.client.api.LdapNetworkConnection;
@@ -58,24 +61,80 @@ public class LDAPProxy {
 	 * @throws CursorException 
 	 */
 	public LDAPUser getUser(String uid) throws LdapException, IOException, CursorException{
-		connection.bind(username, password);
-		EntryCursor cursor = connection.search("ou=Users,dc=csh,dc=rit,dc=edu", "(uidnumber=1)", SearchScope.SUBTREE);
-		if (cursor.next()){
-			Entry entry = cursor.get();
+		if (connect()){
+			EntryCursor cursor = connection.search("ou=Users,dc=csh,dc=rit,dc=edu", "(uidnumber="+uid+")", SearchScope.SUBTREE);
+			if (cursor.next()){
+				Entry entry = cursor.get();
+				return constructFromEntry(entry);
+			}
+			return null;
+		}
+		return null;
+	}
+	
+	/**
+	 * @return a list of all active users. If no connection can be established returns
+	 * an empty list
+	 */
+	public List<LDAPUser> getActiveUsers() throws LdapException, CursorException{
+		List<LDAPUser> activeUsers = new ArrayList<LDAPUser>(64);
+		if (connect()){
+			EntryCursor cursor = connection.search("ou=Users,dc=csh,dc=rit,dc=edu", "(active=1)", SearchScope.SUBTREE);
+			while (cursor.next()){
+				Entry entry = cursor.get();
+				LDAPUser user = constructFromEntry(entry);
+				if (user != null){
+					activeUsers.add(user);
+				}
+			}
+		}
+		return activeUsers;
+	}
+	
+	/**
+	 * If not already connected and authenticated, attempt to do so.
+	 * Return whether the connection is connected after attempt.
+	 */
+	private boolean connect(){
+		boolean connected = connection.isConnected();
+		boolean authenticated = connection.isAuthenticated();
+		try{
+			if (!connected){
+				connection.connect();
+			}
+			if (!authenticated){
+				connection.bind(username, password);
+			}
+		}catch (LdapException e){
+			e.printStackTrace();
+			return false;
+		}
+		assert connection.isConnected() && connection.isAuthenticated();
+		return true;
+	}
+	
+	/**
+	 * @param e An entry for a user (ou=Users) from CSH LDAP
+	 * @return an LDAPUser (null if an error occurs)
+	 */
+	private LDAPUser constructFromEntry(Entry e){
+		try{
 			Map<String, String> values = new HashMap<String, String>(36);
-			for (Attribute attr: entry.getAttributes()){
+			for (Attribute attr: e.getAttributes()){
 				values.put(attr.getId(), attr.getString());
 			}
 			boolean onfloor = values.get("onfloor").equals("1");
 			boolean active = values.get("active").equals("1");
 			LDAPUser user = new LDAPUser(	values.get("uid"),
-											values.get("givenname"),
-											onfloor,
-											active,
-											values.get("uidnumber"),
-											values.get("roomnumber"));
+					values.get("givenname"),
+					onfloor,
+					active,
+					values.get("uidnumber"),
+					values.get("roomnumber"));
 			return user;
+		}catch (LdapInvalidAttributeValueException err){
+			err.printStackTrace();
+			return null;
 		}
-		return null;
 	}
 }
