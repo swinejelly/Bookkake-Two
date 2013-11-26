@@ -16,7 +16,8 @@
 					<tr>
 						<th class="two wide">Cover</th>
 						<th class="four wide">Info</th>
-						<th class="ten wide">Description</th>
+						<th class="eight wide">Description</th>
+						<th class="two wide">Actions</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -28,6 +29,15 @@
 							<h4 wicket:id="publisher"></h4>
 						</td>
 						<td wicket:id="description">
+						</td>
+						<td>
+							<form wicket:id="actions" id="actions" method="post">
+								<!-- Hidden field containing the isbn number -->
+								<input type="hidden" name="isbn" wicket:id="isbn">
+								
+								<input type="submit" name="addBook" value="Add Book!" 
+									class="ui blue submit button">
+							</form>
 						</td>
 					</tr>
 				</tbody>
