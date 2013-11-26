@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -14,13 +15,16 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import edu.rit.csh.auth.UserWebSession;
 import edu.rit.csh.googlebooks.GoogleBookAPIQuery;
 import edu.rit.csh.googlebooks.QueryExecutor;
+import edu.rit.csh.models.Book;
 
 public class PublicSearchResultsPage extends PageTemplate {
 	private static final long serialVersionUID = -3286899693398677487L;
@@ -90,21 +94,25 @@ public class PublicSearchResultsPage extends PageTemplate {
 						new PropertyModel(item.getModel(), "[thumbnailUrl]")));
 				item.add(img);
 				//Add Book button
+				final String isbn13;
+				if (item.getModelObject().containsKey("ISBN_13")){
+					isbn13 = item.getModelObject().get("ISBN_13");
+				}else{
+					isbn13 = "";
+				}
+				
 				Form addBook = new Form("actions"){
+					private String isbn = isbn13;
 					@Override
 					protected void onSubmit(){
 						super.onSubmit();
-						success("Banana");
-						System.out.println("Orange");
+						setResponsePage(HomePage.class);
+						//Create and persist book.
+						UserWebSession session = (UserWebSession)Session.get();
+						Book.createBook(isbn, session.getUser().getUidnumber());
 					}
 				};
 				item.add(addBook);
-				if (item.getModelObject().containsKey("ISBN_13")){
-					addBook.add(new HiddenField<String>("isbn", 
-							new PropertyModel(item.getModel(), "[ISBN_13]"),
-							String.class
-					));
-				}
 			}
 			
 			@Override

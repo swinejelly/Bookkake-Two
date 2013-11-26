@@ -26,14 +26,14 @@ public class BookTest {
 	@Test
 	public void testPersistence() {
 		//Wealth of Nations
-		Book b1 = new Book("1604598913", "1234");
-		Book b2 = new Book("0486295060", "5678");
+		
+		
+		//War of the Worlds
 		
 		Session session = sessFact.openSession();
-		
 		session.beginTransaction();
-		session.save(b1);
-		session.save(b2);
+		Book.createBook(session, "0486295060", "5678");
+		Book.createBook(session, "1604598913", "1234");
 		session.getTransaction().commit();
 		session.close();
 		

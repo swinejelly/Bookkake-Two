@@ -5,7 +5,12 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.apache.wicket.protocol.http.WebApplication;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.annotations.GenericGenerator;
+
+import edu.rit.csh.WicketApplication;
 
 @Entity
 @Table(name = "BOOKS")
@@ -24,6 +29,37 @@ public class Book {
 		this.setIsbn(isbn);
 		this.setOwnerUID(uid);
 	}
+	
+	/**
+	 * Creates a book using a session from the WicketApplication's
+	 * SessionFactory. Requires the app to be running.
+	 * @param sess Hibernate Session
+	 * @param isbn ISBN code
+	 * @param ownerUID LDAP UID of the user.
+	 */
+	public static Book createBook(String isbn, String ownerUID){
+		WicketApplication app = (WicketApplication)WebApplication.get();
+		SessionFactory fact = app.getSessionFactory();
+		Session sess = fact.openSession();
+		Book b = createBook(sess, isbn, ownerUID);
+		sess.getTransaction().commit();
+		sess.close();
+		return b;
+	}
+	
+	/**
+	 * Creates a book using the given (open) session.
+	 * Does not close or commit the transaction.
+	 * @param sess Hibernate Session
+	 * @param isbn ISBN code
+	 * @param ownerUID LDAP UID of the user.
+	 */
+	public static Book createBook(Session sess, String isbn, String ownerUID){
+		Book b = new Book(isbn, ownerUID);
+		sess.save(b);
+		return b;
+	}
+	
 	
 	@Id
 	@GeneratedValue(generator="increment")
