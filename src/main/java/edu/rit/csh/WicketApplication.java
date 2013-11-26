@@ -9,6 +9,8 @@ import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
 
 import edu.rit.csh.auth.LDAPProxy;
 import edu.rit.csh.auth.LDAPUser;
@@ -20,7 +22,10 @@ import edu.rit.csh.auth.UserWebSession;
  * @see edu.rit.csh.Start#main(String[])
  */
 public class WicketApplication extends WebApplication
-{    	
+{
+	
+	private SessionFactory sessionFactory;
+	
 	/**
 	 * @see org.apache.wicket.Application#getHomePage()
 	 */
@@ -37,8 +42,7 @@ public class WicketApplication extends WebApplication
 	public void init()
 	{
 		super.init();
-
-		// add your configuration here
+		sessionFactory = new Configuration().configure().buildSessionFactory();
 	}
 	
 	@Override
@@ -59,5 +63,13 @@ public class WicketApplication extends WebApplication
 			e.printStackTrace();
 		}
 		return sess;
+	}
+
+	public SessionFactory getSessionFactory() {
+		return sessionFactory;
+	}
+
+	public void setSessionFactory(SessionFactory sessionFactory) {
+		this.sessionFactory = sessionFactory;
 	}
 }
