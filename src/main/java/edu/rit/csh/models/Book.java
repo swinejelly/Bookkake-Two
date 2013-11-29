@@ -1,14 +1,20 @@
 package edu.rit.csh.models;
 
+import java.util.HashMap;
+import java.util.List;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
 import org.apache.wicket.protocol.http.WebApplication;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.annotations.GenericGenerator;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import edu.rit.csh.WicketApplication;
 
@@ -41,6 +47,7 @@ public class Book {
 		WicketApplication app = (WicketApplication)WebApplication.get();
 		SessionFactory fact = app.getSessionFactory();
 		Session sess = fact.openSession();
+		sess.beginTransaction();
 		Book b = createBook(sess, isbn, ownerUID);
 		sess.getTransaction().commit();
 		sess.close();
@@ -60,6 +67,36 @@ public class Book {
 		return b;
 	}
 	
+	/**
+	 * Returns all books returned by the user with UIDnumber ownerUID.
+	 * App must be running.
+	 * @param ownerUID UIDnumber of the user.
+	 * @return list of all books owned (regardless of possession) by the user.
+	 */
+	public static List<Book> getOwnedBooks(String ownerUID){
+		WicketApplication app = (WicketApplication)WebApplication.get();
+		SessionFactory fact = app.getSessionFactory();
+		Session sess = fact.openSession();
+		sess.beginTransaction();
+		List<Book> ownedBooks = getOwnedBooks(sess, ownerUID);
+		sess.getTransaction().commit();
+		sess.close();
+		return ownedBooks;
+	}
+	
+	/**
+	 * Returns all books returned by the user with UIDnumber ownerUID.
+	 * @param sess An opened session, which the caller assumes responsibility
+	 * for closing.
+	 * @param ownerUID UIDnumber of the user.
+	 * @return list of all books owned (regardless of possession) by the user.
+	 */
+	public static List<Book> getOwnedBooks(Session sess, String ownerUID){
+		Query qry = sess.createQuery("from Book where ownerUID = :uid");
+		qry.setParameter("uid", ownerUID);
+		List<Book> ownedBooks = qry.list();
+		return ownedBooks;
+	}
 	
 	@Id
 	@GeneratedValue(generator="increment")
@@ -87,5 +124,50 @@ public class Book {
 
 	private void setOwnerUID(String ownerUID) {
 		this.ownerUID = ownerUID;
+	}
+
+	public static HashMap<String, String> buildBookModel(JSONObject obj){
+		HashMap<String, String> model = new HashMap<String, String>();
+		model.put("title", obj.optString("title"));
+		model.put("publisher", obj.optString("publisher"));
+		//description
+		String description = obj.optString("description");
+		StringBuilder sb;
+		if (description.length() > 600){
+			sb = new StringBuilder(600);
+			sb.append(description.substring(0, 597));
+			sb.append("...");
+			description = sb.toString();
+		}
+		model.put("description", description);
+		JSONObject thumbnails = obj.optJSONObject("imageLinks");
+		String thumbnailUrl = thumbnails == null ? "" : thumbnails.optString("thumbnail", "");
+		model.put("thumbnailUrl", thumbnailUrl);
+		//Construct Authors
+		sb = new StringBuilder(64);
+		JSONArray authorsJSON = obj.optJSONArray("authors");
+		if (authorsJSON != null){
+			for (int i = 0; i < authorsJSON.length(); i++){
+				String s = authorsJSON.getString(i);
+				sb.append(s);
+				if (i < authorsJSON.length()-1){
+					sb.append(", ");
+				}
+			}
+		}
+		model.put("authors", sb.toString());
+		
+		//get isbn
+		JSONArray isbns = obj.optJSONArray("industryIdentifiers");
+		if (isbns != null){
+			for (int i = 0; i < isbns.length(); i++){
+				JSONObject isbn = isbns.getJSONObject(i);
+				if ("ISBN_13".equals(isbn.getString("type"))){
+					model.put("ISBN_13", isbn.getString("identifier"));
+					break;
+				}
+			}
+		}
+		return model;
 	}
 }

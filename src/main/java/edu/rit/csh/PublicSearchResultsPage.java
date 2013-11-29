@@ -70,7 +70,7 @@ public class PublicSearchResultsPage extends PageTemplate {
 			int cap = Math.min(10, bookObjects.length());
 			for (int i = 0; i < cap; i++){
 				JSONObject bookJSON = bookObjects.getJSONObject(i).getJSONObject("volumeInfo");
-				HashMap<String, String> model = buildBookModel(bookJSON);
+				HashMap<String, String> model = Book.buildBookModel(bookJSON);
 				if (model.containsKey("ISBN_10") || model.containsKey("ISBN_13")){
 					books.add(model);
 				}
@@ -120,51 +120,6 @@ public class PublicSearchResultsPage extends PageTemplate {
 				return !getList().isEmpty();
 			}
 		});
-	}
-	
-	private HashMap<String, String> buildBookModel(JSONObject obj){
-		HashMap<String, String> model = new HashMap<String, String>();
-		model.put("title", obj.optString("title"));
-		model.put("publisher", obj.optString("publisher"));
-		//description
-		String description = obj.optString("description");
-		StringBuilder sb;
-		if (description.length() > 600){
-			sb = new StringBuilder(600);
-			sb.append(description.substring(0, 597));
-			sb.append("...");
-			description = sb.toString();
-		}
-		model.put("description", description);
-		JSONObject thumbnails = obj.optJSONObject("imageLinks");
-		String thumbnailUrl = thumbnails == null ? "" : thumbnails.optString("thumbnail", "");
-		model.put("thumbnailUrl", thumbnailUrl);
-		//Construct Authors
-		sb = new StringBuilder(64);
-		JSONArray authorsJSON = obj.optJSONArray("authors");
-		if (authorsJSON != null){
-			for (int i = 0; i < authorsJSON.length(); i++){
-				String s = authorsJSON.getString(i);
-				sb.append(s);
-				if (i < authorsJSON.length()-1){
-					sb.append(", ");
-				}
-			}
-		}
-		model.put("authors", sb.toString());
-		
-		//get isbn
-		JSONArray isbns = obj.optJSONArray("industryIdentifiers");
-		if (isbns != null){
-			for (int i = 0; i < isbns.length(); i++){
-				JSONObject isbn = isbns.getJSONObject(i);
-				if ("ISBN_13".equals(isbn.getString("type"))){
-					model.put("ISBN_13", isbn.getString("identifier"));
-					break;
-				}
-			}
-		}
-		return model;
 	}
 
 }
