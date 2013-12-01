@@ -92,7 +92,7 @@ public class Book {
 	 * @return list of all books owned (regardless of possession) by the user.
 	 */
 	public static List<Book> getOwnedBooks(Session sess, String ownerUID){
-		Query qry = sess.createQuery("from Book where ownerUID = :uid");
+		Query qry = sess.createQuery("from Book where ownerUID = :uid and active = true");
 		qry.setParameter("uid", ownerUID);
 		List<Book> ownedBooks = qry.list();
 		return ownedBooks;

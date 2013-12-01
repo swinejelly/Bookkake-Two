@@ -87,6 +87,25 @@ public class BookTest {
 	}
 	
 	/**
+	 * Verify that getOwnedBooks doesn't return any deleted books.
+	 */
+	@Test
+	public void testGetOwnedBooksDeleted(){
+		Session createSess = sessFact.openSession();
+		createSess.beginTransaction();
+		Book.createBook(createSess, "9780807208847", "1234");
+		Book.createBook(createSess, "9780142409848", "1234").delete(createSess);
+		Book.createBook(createSess, "0486295060", "1234");
+		createSess.getTransaction().commit();
+		createSess.close();
+		
+		Session testSess = sessFact.openSession();
+		testSess.beginTransaction();
+		List<Book> books = Book.getOwnedBooks(testSess, "1234");
+		assertEquals(2, books.size());
+	}
+	
+	/**
 	 * Verify that deleting books works.
 	 */
 	@Test
