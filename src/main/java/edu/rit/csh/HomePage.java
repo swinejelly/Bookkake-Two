@@ -90,7 +90,6 @@ public class HomePage extends PageTemplate {
 
 			@Override
 			protected void populateItem(ListItem<HashMap<String, String>> item) {
-				System.out.println(item.getModel().getObject().get("title"));
 				item.add(new Label("title", new PropertyModel(item.getModel(), "[title]")));
 			}
 			
