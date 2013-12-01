@@ -38,6 +38,31 @@ public class Book {
 		this.setOwnerUID(uid);
 	}
 	
+	public static Book getBook(String isbn, String ownerUID){
+		SessionFactory fact = WicketApplication.getSessionFactory();
+		Session sess = fact.openSession();
+		sess.beginTransaction();
+		Book b = getBook(sess, isbn, ownerUID);
+		sess.close();
+		return b;
+	}
+	
+	/**
+	 * Get the book with the given isbn belonging to the user identified
+	 * by ownerUID
+	 * @param sess an open hibernate session with a transaction started. 
+	 * Caller assumes responsibility for closing and committing.
+	 * @param isbn isbn of the book. must be an exact match.
+	 * @return A book if found, else null.
+	 */
+	public static Book getBook(Session sess, String isbn, String ownerUID){
+		Query qry = sess.createQuery("from Book where isbn = :isbn and ownerUID = :uid");
+		qry.setParameter("isbn", isbn);
+		qry.setParameter("uid", ownerUID);
+		Book b = (Book) qry.uniqueResult();
+		return b;
+	}
+
 	/**
 	 * Creates a book using a session from the WicketApplication's
 	 * SessionFactory. Requires the app to be running.

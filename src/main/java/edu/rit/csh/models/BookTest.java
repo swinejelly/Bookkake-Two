@@ -157,4 +157,26 @@ public class BookTest {
 		Book testBook = (Book)testQry.uniqueResult();
 		assertFalse(testBook.isActive());
 	}
+	
+	/**
+	 * Test that the get method returns books when properly identified.
+	 */
+	@Test
+	public void testGet(){
+		String isbn = "9780807208847";
+		String ownerUID = "1234";
+		Session createSess = sessFact.openSession();
+		createSess.beginTransaction();
+		Book b = Book.createBook(createSess, isbn, ownerUID);
+		b.delete(createSess);
+		createSess.getTransaction().commit();
+		createSess.close();
+		
+		Session testSess = sessFact.openSession();
+		testSess.beginTransaction();
+		Book bTest = Book.getBook(testSess, isbn, ownerUID);
+		assertNotNull(bTest);
+		assertEquals(isbn, bTest.getIsbn());
+		assertEquals(ownerUID, bTest.getOwnerUID());
+	}
 }

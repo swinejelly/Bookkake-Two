@@ -7,11 +7,14 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.json.JSONArray;
@@ -89,10 +92,27 @@ public class HomePage extends PageTemplate {
 			private static final long serialVersionUID = -4592905416065301177L;
 
 			@Override
-			protected void populateItem(ListItem<HashMap<String, String>> item) {
+			protected void populateItem(final ListItem<HashMap<String, String>> item) {
+				//turn on outputmarkupid for AJAX features (below)
+				item.setOutputMarkupId(true);
+				
+				//Add title
 				item.add(new Label("title", new PropertyModel(item.getModel(), "[title]")));
+				
+				//Add link to delete book
+				final String isbn13 = ((HashMap<String,String>)item.getModelObject()).get("ISBN_13");
+				final String ownerUID = ((UserWebSession)UserWebSession.get()).getUser().getUidnumber();
+				item.add(new AjaxFallbackLink("delete"){
+					private static final long serialVersionUID = 589193295987221975L;
+						@Override
+						public void onClick(AjaxRequestTarget target) {
+							Book.getBook(isbn13, ownerUID).delete();
+							item.setVisible(false);
+							target.add(item);
+						}
+				});
+				
 			}
-			
 		});
 	}
 }
