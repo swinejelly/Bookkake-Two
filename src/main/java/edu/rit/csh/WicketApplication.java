@@ -64,9 +64,10 @@ public class WicketApplication extends WebApplication
 		}
 		return sess;
 	}
-
-	public SessionFactory getSessionFactory() {
-		return sessionFactory;
+	
+	public static SessionFactory getSessionFactory(){
+		WicketApplication app = (WicketApplication)WebApplication.get();
+		return app.sessionFactory;
 	}
 
 	public void setSessionFactory(SessionFactory sessionFactory) {

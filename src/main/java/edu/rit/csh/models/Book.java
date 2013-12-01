@@ -27,6 +27,8 @@ public class Book {
 	
 	private String ownerUID;
 	
+	private boolean active = true;
+	
 	public Book(){
 		
 	}
@@ -44,8 +46,7 @@ public class Book {
 	 * @param ownerUID LDAP UID of the user.
 	 */
 	public static Book createBook(String isbn, String ownerUID){
-		WicketApplication app = (WicketApplication)WebApplication.get();
-		SessionFactory fact = app.getSessionFactory();
+		SessionFactory fact = WicketApplication.getSessionFactory();
 		Session sess = fact.openSession();
 		sess.beginTransaction();
 		Book b = createBook(sess, isbn, ownerUID);
@@ -74,8 +75,7 @@ public class Book {
 	 * @return list of all books owned (regardless of possession) by the user.
 	 */
 	public static List<Book> getOwnedBooks(String ownerUID){
-		WicketApplication app = (WicketApplication)WebApplication.get();
-		SessionFactory fact = app.getSessionFactory();
+		SessionFactory fact = WicketApplication.getSessionFactory();
 		Session sess = fact.openSession();
 		sess.beginTransaction();
 		List<Book> ownedBooks = getOwnedBooks(sess, ownerUID);
@@ -96,6 +96,19 @@ public class Book {
 		qry.setParameter("uid", ownerUID);
 		List<Book> ownedBooks = qry.list();
 		return ownedBooks;
+	}
+	
+	public void delete(){
+		Session sess = WicketApplication.getSessionFactory().openSession();
+		sess.beginTransaction();
+		sess.update(this);
+		delete(sess);
+		sess.getTransaction().commit();
+		sess.close();
+	}
+	
+	public void delete(Session sess){
+		setActive(false);
 	}
 	
 	@Id
@@ -124,6 +137,14 @@ public class Book {
 
 	private void setOwnerUID(String ownerUID) {
 		this.ownerUID = ownerUID;
+	}
+
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
 	}
 
 	public static HashMap<String, String> buildBookModel(JSONObject obj){

@@ -4,10 +4,13 @@ import static org.junit.Assert.*;
 
 import java.util.List;
 
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
+import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -21,18 +24,26 @@ public class BookTest {
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
+		sessFact.close();
+	}
+	
+	@After
+	public void cleanTest(){
+		Session sess = sessFact.openSession();
+		sess.beginTransaction();
+		Query qry = sess.createQuery("delete from Book");
+		qry.executeUpdate();
+		sess.getTransaction().commit();
+		sess.close();
 	}
 
 	@Test
 	public void testPersistence() {
-		//Wealth of Nations
-		
-		
-		//War of the Worlds
-		
 		Session session = sessFact.openSession();
 		session.beginTransaction();
+		//Wealth of Nations
 		Book.createBook(session, "0486295060", "5678");
+		//War of the Worlds
 		Book.createBook(session, "1604598913", "1234");
 		session.getTransaction().commit();
 		session.close();
@@ -46,4 +57,85 @@ public class BookTest {
 		}
 	}
 
+	@Test
+	public void testGetOwnedBooks(){
+		Session session = sessFact.openSession();
+		session.beginTransaction();
+		Book.createBook(session, "0486295060", "5678");
+		Book.createBook(session, "1604598913", "1234");
+		Book.createBook(session, "9780807208847", "5678");
+		Book.createBook(session, "9780142409848", "4321");
+		session.getTransaction().commit();
+		session.close();
+		
+		session = sessFact.openSession();
+		session.beginTransaction();
+		List<Book> results1234 = Book.getOwnedBooks(session, "1234");
+		List<Book> results5678 = Book.getOwnedBooks(session, "5678");
+		List<Book> results4321 = Book.getOwnedBooks(session, "4321");
+		//should return empty list.
+		List<Book> results9999 = Book.getOwnedBooks(session, "9999");
+		assertNotNull(results1234);
+		assertNotNull(results5678);
+		assertNotNull(results4321);
+		assertNotNull(results9999);
+		
+		assertEquals(1, results1234.size());
+		assertEquals(2, results5678.size());
+		assertEquals(1, results4321.size());
+		assertEquals(0, results9999.size());
+	}
+	
+	/**
+	 * Verify that deleting books works.
+	 */
+	@Test
+	public void testDelete(){
+		//create book
+		String isbn = "9780807208847";
+		Session createSess = sessFact.openSession();
+		createSess.beginTransaction();
+		Book.createBook(createSess, isbn, "1234");
+		createSess.getTransaction().commit();
+		createSess.close();
+		//get book and "delete" it
+		Session deleteSess = sessFact.openSession();
+		deleteSess.beginTransaction();
+		Query deleteQuery = deleteSess.createQuery("from Book where isbn = :isbn");
+		deleteQuery.setString("isbn", isbn);
+		Book deleteBook = (Book)deleteQuery.uniqueResult();
+		deleteBook.delete(deleteSess);
+		deleteSess.getTransaction().commit();
+		deleteSess.close();
+		//get book again and check that it's "deleted"
+		Session testSess = sessFact.openSession();
+		testSess.beginTransaction();
+		Query testQry = testSess.createQuery("from Book where isbn = :isbn");
+		testQry.setString("isbn", isbn);
+		Book testBook = (Book)testQry.uniqueResult();
+		assertFalse(testBook.isActive());
+	}
+	
+	/**
+	 * Verify that deleting books works when done in the same session the
+	 * book is created in.
+	 */
+	@Test
+	public void testDelete2(){
+		//create book
+		String isbn = "9780807208847";
+		Session createSess = sessFact.openSession();
+		createSess.beginTransaction();
+		Book b = Book.createBook(createSess, isbn, "1234");
+		b.delete(createSess);
+		createSess.getTransaction().commit();
+		createSess.close();
+		//get book again and check that it's "deleted"
+		Session testSess = sessFact.openSession();
+		testSess.beginTransaction();
+		Query testQry = testSess.createQuery("from Book where isbn = :isbn");
+		testQry.setString("isbn", isbn);
+		Book testBook = (Book)testQry.uniqueResult();
+		assertFalse(testBook.isActive());
+	}
 }
