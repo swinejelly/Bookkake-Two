@@ -25,6 +25,7 @@ import edu.rit.csh.auth.UserWebSession;
 import edu.rit.csh.googlebooks.GoogleBookISBNQuery;
 import edu.rit.csh.googlebooks.QueryExecutor;
 import edu.rit.csh.models.Book;
+import edu.rit.csh.models.BookInfo;
 
 public class HomePage extends PageTemplate {
 	private static final long serialVersionUID = -5915056470130165360L;
@@ -67,52 +68,42 @@ public class HomePage extends PageTemplate {
 		
 		String uidNum = ((UserWebSession)getSession()).getUser().getUidnumber();
 		List<Book> userBooks = Book.getOwnedBooks(uidNum);
-		List<HashMap<String,String>> bookModels = new ArrayList<HashMap<String,String>>();
+		final List<BookInfo> bookInfos = new ArrayList<BookInfo>();
 		for (Book b: userBooks){
-			GoogleBookISBNQuery qry = new GoogleBookISBNQuery(b.getIsbn());
-			try {
-				JSONObject obj = QueryExecutor.retrieveJSON(qry);
-				JSONArray items = obj.optJSONArray("items");
-				if (items != null){
-					JSONObject bookJSON = items.getJSONObject(0);
-					if (bookJSON != null){
-						JSONObject volumeInfo = bookJSON.getJSONObject("volumeInfo");
-						if (volumeInfo != null){
-							bookModels.add(Book.buildBookModel(volumeInfo));	
-						}
-					}
-				}
-			} catch (JSONException e) {
-				e.printStackTrace(); continue;
-			} catch (IOException e) {
-				e.printStackTrace(); continue;
+			BookInfo info = BookInfo.getBookInfo(b.getIsbn());
+			if (info != null){
+				bookInfos.add(info);
 			}
 		}
-		add(new ListView<HashMap<String,String>>("books", bookModels){
+		final ListView<BookInfo> myBooks = 
+		new ListView<BookInfo>("books", bookInfos){
 			private static final long serialVersionUID = -4592905416065301177L;
 
 			@Override
-			protected void populateItem(final ListItem<HashMap<String, String>> item) {
+			protected void populateItem(final ListItem<BookInfo> item) {
 				//turn on outputmarkupid for AJAX features (below)
 				item.setOutputMarkupId(true);
 				
 				//Add title
-				item.add(new Label("title", new PropertyModel(item.getModel(), "[title]")));
+				item.add(new Label("title", new PropertyModel(item.getModel(), "title")));
 				
 				//Add link to delete book
-				final String isbn13 = ((HashMap<String,String>)item.getModelObject()).get("ISBN_13");
+				final String isbn13 = ((BookInfo)item.getModelObject()).getIsbn();
 				final String ownerUID = ((UserWebSession)UserWebSession.get()).getUser().getUidnumber();
 				item.add(new AjaxFallbackLink("delete"){
 					private static final long serialVersionUID = 589193295987221975L;
 						@Override
 						public void onClick(AjaxRequestTarget target) {
 							Book.getBook(isbn13, ownerUID).delete();
-							item.setVisible(false);
-							target.add(item);
+							bookInfos.remove(item.getModelObject());
+							//parent is myBooks
+							target.add(HomePage.this);
 						}
 				});
 				
 			}
-		});
+		};
+		myBooks.setOutputMarkupId(true);
+		add(myBooks);
 	}
 }
