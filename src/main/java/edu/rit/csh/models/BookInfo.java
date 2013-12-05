@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -201,6 +202,7 @@ public class BookInfo implements Serializable{
 		this.publisher = publisher;
 	}
 	
+	@Column(columnDefinition="TEXT")
 	public String getDescription() {
 		return description;
 	}
