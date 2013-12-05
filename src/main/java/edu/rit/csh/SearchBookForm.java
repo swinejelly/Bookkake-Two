@@ -16,37 +16,32 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 public class SearchBookForm extends Form {
 	private static final long serialVersionUID = 8123125720433269221L;
 	
-	private final TextField title;
-	private final TextField author;
-	private final Button submit;
+	private String title;
+	private String author;
 
 	public SearchBookForm(String id) {
 		super(id);
+		setDefaultModel(new CompoundPropertyModel<SearchBookForm>(this));
 		
-		title = new TextField("title");
-		title.setDefaultModel(Model.of(""));
+		TextField title = new TextField("title");
 		title.setLabel(Model.of("Title"));
 		add(title);
 		
-		author = new TextField("author");
-		author.setDefaultModel(Model.of(""));
+		TextField author = new TextField("author");
 		author.setLabel(Model.of("Author"));
 		author.setRequired(false);
 		add(author);
 		
-		submit = new Button("searchBookSubmit");
-		add(submit);
-		setDefaultModel(new CompoundPropertyModel<SearchBookForm>(this));
+		add(new Button("searchBookSubmit"));
+
 	}
 	
 	@Override
 	public void onSubmit(){
-		String titleStr = (String)title.getDefaultModelObject();
-		String authorStr = (String)author.getDefaultModelObject();
 		PageParameters params = new PageParameters();
-		params.add("title", titleStr);
-		if (authorStr != null){
-			params.add("author", authorStr);
+		params.add("title", title);
+		if (author != null){
+			params.add("author", author);
 		}
 		setResponsePage(PublicSearchResultsPage.class, params);
 	}
