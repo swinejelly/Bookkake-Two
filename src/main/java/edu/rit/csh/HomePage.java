@@ -41,6 +41,11 @@ public class HomePage extends PageTemplate {
 	 * The link to add a book.
 	 */
 	private AjaxLink addBookLink;
+	
+	/**
+	 * The link to search for a book.
+	 */
+	private AjaxLink searchBookLink;
 
 	public HomePage(){
 		super();
@@ -51,7 +56,7 @@ public class HomePage extends PageTemplate {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				//construct the new AddBookPanel
+				//construct the new SearchBookPanel
 				WebMarkupContainer actionPanel = new SearchBookPanel("action");
 				actionPanel.setOutputMarkupId(true);
 				//Replace it in the page hierarchy
@@ -63,8 +68,25 @@ public class HomePage extends PageTemplate {
 			
 		};
 		
+		searchBookLink = new AjaxLink("searchBookLink"){
+			private static final long serialVersionUID = -263111810841234937L;
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				//Construct SearchOwnedBookPanel
+				WebMarkupContainer actionPanel = new SearchOwnedBookPanel("action");
+				actionPanel.setOutputMarkupId(true);
+				//replace
+				action.replaceWith(actionPanel);
+				//return panel to client.
+				target.add(actionPanel);
+				action = actionPanel;
+			}
+		};
+		
 		add(action);
 		add(addBookLink);
+		add(searchBookLink);
 		
 		String uidNum = ((UserWebSession)getSession()).getUser().getUidnumber();
 		List<Book> userBooks = Book.getOwnedBooks(uidNum);

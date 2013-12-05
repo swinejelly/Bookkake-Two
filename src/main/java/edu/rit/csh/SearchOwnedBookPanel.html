@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+	<head>
+	</head>
+	<body>
+		<wicket:panel>
+			<form wicket:id="searchOwnedBookForm" id="searchOwnedBookForm" method="post"
+			   class="ui form segment">
+				<label>Title</label>
+				<input type="text" name="title" wicket:id="title">
+				<br>
+				<br>
+				<input type="submit" name="searchBook" value="Find Books!" wicket:id="searchOwnedBookSubmit"
+				  class="">
+				<!-- Class should be modified by SearchOwnedBookForm.java -->  
+			</form>
+		</wicket:panel>
+	</body>
+</html>

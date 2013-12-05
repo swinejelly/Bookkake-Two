@@ -177,6 +177,19 @@ public class BookInfo implements Serializable{
 		return books;
 	}
 	
+	public static List<BookInfo> getAllBooks(){
+		Session sess = WicketApplication.getSessionFactory().openSession();
+		sess.beginTransaction();
+		List<BookInfo> books = getAllBooks(sess);
+		sess.getTransaction().commit();
+		sess.close();
+		return books;
+	}
+	
+	public static List<BookInfo> getAllBooks(Session sess){
+		return sess.createCriteria(BookInfo.class).list();
+	}
+	
 	@Id
 	public String getIsbn() {
 		return isbn;
