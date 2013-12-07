@@ -36,7 +36,18 @@
 							</td>
 							<td wicket:id="status">
 							</td>
-							<td wicket:id="actions">
+							<td>
+								<a wicket:id="actions" class="ui blue submit button">
+								Borrow Book!
+								</a>
+								<form wicket:id="borrowDateSelect" method="post">
+									<label>Enter when you will return this book.</label>
+									<br>
+									<input wicket:id="date" type="text" name="date">
+									<br>
+									<input type="submit" name="addBook" value="Borrow Book!" 
+									class="ui green submit button">
+								</form>
 							</td>
 						</tr>
 					</tbody>

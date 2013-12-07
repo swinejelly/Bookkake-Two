@@ -1,6 +1,7 @@
 package edu.rit.csh;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -8,8 +9,14 @@ import java.util.TreeMap;
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.datetime.StyleDateConverter;
+import org.apache.wicket.datetime.markup.html.form.DateTextField;
+import org.apache.wicket.extensions.yui.calendar.DatePicker;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.PropertyModel;
@@ -61,10 +68,39 @@ public class OwnedBookSearchResultsPage extends PageTemplate {
 				Book b = item.getModelObject();
 				item.add(new Label("owner", new PropertyModel(users.get(b.getOwnerUID()), "givenname")));
 				item.add(new Label("status", "STATUS"));
-				item.add(new Label("actions", "ACTIONS"));
+				final BorrowBookForm borrowForm = new BorrowBookForm("borrowDateSelect");
+				borrowForm.setVisible(false);
+				borrowForm.setOutputMarkupPlaceholderTag(true);
+				AjaxLink borrowLink = 
+					new AjaxLink("actions"){
+						private static final long serialVersionUID = 633842873015083341L;
+						@Override
+						public void onClick(AjaxRequestTarget target) {
+							setVisible(false);
+							target.add(this);
+							borrowForm.setVisible(true);
+							target.add(borrowForm);
+						}
+				};
+				borrowLink.setOutputMarkupId(true);
+				item.add(borrowLink);
 				
+				item.add(borrowForm);
 			}
-			
 		});
+	}
+	
+	private class BorrowBookForm extends Form{
+		private static final long serialVersionUID = 934961668590503050L;
+		Date date;
+		public BorrowBookForm(String id) {
+			super(id);
+			DateTextField dateField = new DateTextField("date",
+					new PropertyModel<Date>(this, "date"),
+					new StyleDateConverter(false));
+			dateField.add(new DatePicker());
+			add(dateField);
+			setOutputMarkupId(true);
+		}
 	}
 }
