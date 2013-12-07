@@ -1,5 +1,6 @@
 package edu.rit.csh.models;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
@@ -8,8 +9,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
-import org.apache.wicket.protocol.http.WebApplication;
+import org.apache.directory.api.ldap.model.cursor.CursorException;
+import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -18,6 +21,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import edu.rit.csh.WicketApplication;
+import edu.rit.csh.auth.LDAPUser;
 
 @Entity
 @Table(name = "BOOKS")
@@ -42,7 +46,7 @@ public class Book implements Serializable{
 	}
 	
 	public static Book getBook(String isbn, String ownerUID){
-		SessionFactory fact = WicketApplication.getSessionFactory();
+		SessionFactory fact = WicketApplication.getWicketApplication().getSessionFactory();
 		Session sess = fact.openSession();
 		sess.beginTransaction();
 		Book b = getBook(sess, isbn, ownerUID);
@@ -74,7 +78,7 @@ public class Book implements Serializable{
 	 * @param ownerUID LDAP UID of the user.
 	 */
 	public static Book createBook(String isbn, String ownerUID){
-		SessionFactory fact = WicketApplication.getSessionFactory();
+		SessionFactory fact = WicketApplication.getWicketApplication().getSessionFactory();
 		Session sess = fact.openSession();
 		sess.beginTransaction();
 		Book b = createBook(sess, isbn, ownerUID);
@@ -103,7 +107,7 @@ public class Book implements Serializable{
 	 * @return list of all books owned (regardless of possession) by the user.
 	 */
 	public static List<Book> getOwnedBooks(String ownerUID){
-		SessionFactory fact = WicketApplication.getSessionFactory();
+		SessionFactory fact = WicketApplication.getWicketApplication().getSessionFactory();
 		Session sess = fact.openSession();
 		sess.beginTransaction();
 		List<Book> ownedBooks = getOwnedBooks(sess, ownerUID);
@@ -127,7 +131,7 @@ public class Book implements Serializable{
 	}
 	
 	public static List<Book> getBooksByIsbn(String isbn){
-		Session sess = WicketApplication.getSessionFactory().openSession();
+		Session sess = WicketApplication.getWicketApplication().getSessionFactory().openSession();
 		sess.beginTransaction();
 		List<Book> books = getBooksByIsbn(sess, isbn);
 		sess.getTransaction().commit();
@@ -142,7 +146,7 @@ public class Book implements Serializable{
 	}
 	
 	public void delete(){
-		Session sess = WicketApplication.getSessionFactory().openSession();
+		Session sess = WicketApplication.getWicketApplication().getSessionFactory().openSession();
 		sess.beginTransaction();
 		sess.update(this);
 		delete(sess);
@@ -180,6 +184,27 @@ public class Book implements Serializable{
 
 	private void setOwnerUID(String ownerUID) {
 		this.ownerUID = ownerUID;
+	}
+	
+	/**
+	 * Automatically gets the owner using a LDAP connection
+	 * to CSH's LDAP server.
+	 * @return the LDAPUser if successful, else null.
+	 */
+	@Transient
+	public LDAPUser getOwner(){
+		try {
+			return WicketApplication.getWicketApplication().getLDAPProxy().getUser(ownerUID);
+		} catch (LdapException | IOException | CursorException e) {
+			return null;
+		}
+	}
+	
+	/**
+	 * Set the new owner of this book to newOwner
+	 */
+	public void setOwner(LDAPUser newOwner){
+		ownerUID = newOwner.getUidnumber();
 	}
 
 	public boolean isActive() {

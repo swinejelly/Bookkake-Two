@@ -25,6 +25,7 @@ public class WicketApplication extends WebApplication
 {
 	
 	private SessionFactory sessionFactory;
+	private LDAPProxy ldapProxy;
 	
 	/**
 	 * @see org.apache.wicket.Application#getHomePage()
@@ -50,27 +51,35 @@ public class WicketApplication extends WebApplication
 		UserWebSession sess = new UserWebSession(request);
 		LDAPUser dummyUser;
 		try {
-			dummyUser = new LDAPProxy("ldap.properties").getUser("10412");
+			dummyUser = getLDAPProxy().getUser("10412");
 			sess.setUser(dummyUser);
-		} catch (LdapException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (CursorException e) {
-			// TODO Auto-generated catch block
+		} catch (LdapException | IOException | CursorException e) {
 			e.printStackTrace();
 		}
 		return sess;
 	}
 	
-	public static SessionFactory getSessionFactory(){
-		WicketApplication app = (WicketApplication)WebApplication.get();
-		return app.sessionFactory;
+	public static WicketApplication getWicketApplication(){
+		return (WicketApplication)WebApplication.get();
+	}
+	
+	public SessionFactory getSessionFactory(){
+		return sessionFactory;
 	}
 
 	public void setSessionFactory(SessionFactory sessionFactory) {
 		this.sessionFactory = sessionFactory;
+	}
+	
+	public LDAPProxy getLDAPProxy(){
+		try {
+			if (ldapProxy == null){
+				ldapProxy = new LDAPProxy("ldap.properties");
+			}
+			return ldapProxy;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 }

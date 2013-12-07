@@ -1,8 +1,5 @@
 package edu.rit.csh;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import org.apache.wicket.AttributeModifier;
@@ -10,20 +7,12 @@ import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.HiddenField;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
-import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import edu.rit.csh.auth.UserWebSession;
-import edu.rit.csh.googlebooks.GoogleBookAPIQuery;
-import edu.rit.csh.googlebooks.QueryExecutor;
 import edu.rit.csh.models.Book;
 import edu.rit.csh.models.BookInfo;
 

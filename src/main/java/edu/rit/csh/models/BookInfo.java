@@ -3,7 +3,6 @@ package edu.rit.csh.models;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -76,7 +75,7 @@ public class BookInfo implements Serializable{
 	 * @return the BookInfo if retrievable, else null.
 	 */
 	public static BookInfo getBookInfo(String isbn){
-		Session sess = WicketApplication.getSessionFactory().openSession();
+		Session sess = WicketApplication.getWicketApplication().getSessionFactory().openSession();
 		sess.beginTransaction();
 		BookInfo b = getBookInfo(sess, isbn);
 		sess.getTransaction().commit();
@@ -116,9 +115,7 @@ public class BookInfo implements Serializable{
 						}
 					}
 				}
-			} catch (JSONException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
+			} catch (JSONException | IOException e) {
 				e.printStackTrace();
 			}
 		}
@@ -127,7 +124,7 @@ public class BookInfo implements Serializable{
 	
 	
 	public static List<BookInfo> searchBooks(String title, String author, int cap){
-		Session sess = WicketApplication.getSessionFactory().openSession();
+		Session sess = WicketApplication.getWicketApplication().getSessionFactory().openSession();
 		sess.beginTransaction();
 		List<BookInfo> bookInfos = searchBooks(sess, title, author, cap);
 		sess.getTransaction().commit();
@@ -154,14 +151,10 @@ public class BookInfo implements Serializable{
 		JSONObject json;
 		try{
 			json = QueryExecutor.retrieveJSON(qry);
-		}catch (IOException e){
-			e.printStackTrace();
-			return books;
-		}catch (JSONException e){
+		}catch (IOException | JSONException e){
 			e.printStackTrace();
 			return books;
 		}
-		
 		JSONArray bookObjects = json.optJSONArray("items");
 		if (bookObjects != null){
 			cap = Math.min(cap, bookObjects.length());
@@ -178,7 +171,7 @@ public class BookInfo implements Serializable{
 	}
 	
 	public static List<BookInfo> getAllBooks(){
-		Session sess = WicketApplication.getSessionFactory().openSession();
+		Session sess = WicketApplication.getWicketApplication().getSessionFactory().openSession();
 		sess.beginTransaction();
 		List<BookInfo> books = getAllBooks(sess);
 		sess.getTransaction().commit();

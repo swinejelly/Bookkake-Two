@@ -15,7 +15,6 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import edu.rit.csh.auth.LDAPProxy;
 import edu.rit.csh.auth.LDAPUser;
 import edu.rit.csh.models.Book;
 import edu.rit.csh.models.BookInfo;
@@ -46,10 +45,9 @@ public class OwnedBookSearchResultsPage extends PageTemplate {
 		
 		List<Book> activeBooks = Book.getBooksByIsbn(isbn);
 		final Map<String, LDAPUser> users = new TreeMap<>();
-		LDAPProxy proxy = new LDAPProxy("ldap.properties");
 		for (Book b: activeBooks){
 			if (!users.containsKey(b.getOwnerUID())){
-				LDAPUser user = proxy.getUser(b.getOwnerUID());
+				LDAPUser user = b.getOwner();
 				users.put(b.getOwnerUID(), user);
 				System.out.println(user.getGivenname());
 			}
