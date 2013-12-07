@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+	<header>
+	</header>
+	<body>
+		<wicket:extend>
+			This is the OwnedBookSearchResultsPage.
+			<div class="ui segment">
+				<div class="ui grid">
+					<div class="two wide column">
+						<img wicket:id="img"></img>
+					</div>
+					<div class="four wide column">
+						<h2 wicket:id="title"></h2>
+						<h3 wicket:id="authors"></h3>
+						<h4 wicket:id="publisher"></h4>
+					</div>
+					<div class="eight wide column">
+						<p wicket:id="description"></p>
+					</div>
+					<div class="two wide column">
+						
+					</div>
+				</div>
+				<table class="ui table">
+					<thead>
+						<tr>
+							<th>Owner</th>
+							<th>Status</th>
+							<th>Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr wicket:id="book">
+							<td wicket:id="owner">
+							</td>
+							<td wicket:id="status">
+							</td>
+							<td wicket:id="actions">
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</wicket:extend>
+	</body>
+</html>

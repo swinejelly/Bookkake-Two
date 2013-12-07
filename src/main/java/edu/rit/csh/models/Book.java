@@ -123,6 +123,21 @@ public class Book {
 		return ownedBooks;
 	}
 	
+	public static List<Book> getBooksByIsbn(String isbn){
+		Session sess = WicketApplication.getSessionFactory().openSession();
+		sess.beginTransaction();
+		List<Book> books = getBooksByIsbn(sess, isbn);
+		sess.getTransaction().commit();
+		sess.close();
+		return books;
+	}
+	
+	public static List<Book> getBooksByIsbn(Session sess, String isbn){
+		Query qry = sess.createQuery("from Book where isbn = :isbn and active = true");
+		qry.setParameter("isbn", isbn);
+		return qry.list();
+	}
+	
 	public void delete(){
 		Session sess = WicketApplication.getSessionFactory().openSession();
 		sess.beginTransaction();

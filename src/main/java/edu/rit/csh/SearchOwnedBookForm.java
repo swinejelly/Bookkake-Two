@@ -13,6 +13,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import edu.rit.csh.models.BookInfo;
 
@@ -22,12 +23,13 @@ public class SearchOwnedBookForm extends Form {
 	private String title;
 	private final BookAutoCompleteField titleField;
 	private final Button submitButton;
+	private List<BookInfo> bookInfos;
 
 	public SearchOwnedBookForm(String id) {
 		super(id);
 		setDefaultModel(new CompoundPropertyModel<SearchOwnedBookForm>(this));
 		
-		List<BookInfo> bookInfos = BookInfo.getAllBooks();
+		bookInfos = BookInfo.getAllBooks();
 		List<String> titles = new ArrayList<String>(bookInfos.size());
 		for (BookInfo b: bookInfos){
 			titles.add(b.getTitle());
@@ -46,6 +48,16 @@ public class SearchOwnedBookForm extends Form {
 	@Override
 	public void onSubmit(){
 		if (titleField.choices.contains(title)){
+			String isbn = "";
+			for (BookInfo b: bookInfos){
+				if (b.getTitle().equals(title)){
+					isbn = b.getIsbn();
+					break;
+				}
+			}
+			PageParameters params = new PageParameters();
+			params.add("isbn", isbn);
+			setResponsePage(OwnedBookSearchResultsPage.class, params);
 		}
 	}
 	

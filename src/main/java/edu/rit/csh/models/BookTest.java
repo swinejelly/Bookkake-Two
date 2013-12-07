@@ -179,4 +179,32 @@ public class BookTest {
 		assertEquals(isbn, bTest.getIsbn());
 		assertEquals(ownerUID, bTest.getOwnerUID());
 	}
+	
+	/**
+	 * Test getBooksByIsbn
+	 */
+	@Test
+	public void testGetBooksByIsbn(){
+		String isbns[] = {"9780807208847", "0486295060", "0486295060"};
+		String uids[]  = {"1234",          "5678",          "1234"};
+		Session createSess = sessFact.openSession();
+		createSess.beginTransaction();
+		for (int i = 0; i < isbns.length; i++){
+			Book.createBook(createSess, isbns[i], uids[i]);
+		}
+		createSess.getTransaction().commit();
+		createSess.close();
+		
+		Session testSess = sessFact.openSession();
+		testSess.beginTransaction();
+		List<Book> books0486 = Book.getBooksByIsbn(testSess, "0486295060");
+		assertEquals(2, books0486.size());
+		
+		List<Book> books9780 = Book.getBooksByIsbn(testSess, "9780807208847");
+		assertEquals(1, books9780.size());
+		
+		List<Book> noBooks = Book.getBooksByIsbn(testSess, "1604598913");
+		assertNotNull(noBooks);
+		assertEquals(0, noBooks.size());
+	}
 }
