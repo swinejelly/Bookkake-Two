@@ -1,5 +1,7 @@
 package edu.rit.csh.auth;
 
+import java.io.Serializable;
+
 /**
  * A POJO model that contains information about a user pulled from LDAP or
  * custom constructed for testing and debugging. LDAPUser cannot modify the LDAP 
@@ -7,7 +9,8 @@ package edu.rit.csh.auth;
  * @author scott
  *
  */
-public class LDAPUser {
+public class LDAPUser implements Serializable{
+	private static final long serialVersionUID = 5065891838645625266L;
 	/**Username*/
 	private String uid;
 	/**First/nickname*/
