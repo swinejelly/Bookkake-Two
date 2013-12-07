@@ -1,5 +1,6 @@
 package edu.rit.csh.models;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 
@@ -20,7 +21,9 @@ import edu.rit.csh.WicketApplication;
 
 @Entity
 @Table(name = "BOOKS")
-public class Book {
+public class Book implements Serializable{
+	private static final long serialVersionUID = -8012947208250080965L;
+
 	private Long id;
 	
 	private String isbn;
