@@ -31,7 +31,7 @@
         <!-- Names the entity classes -->
         <mapping class="edu.rit.csh.models.Book"/>
         <mapping class="edu.rit.csh.models.BookInfo"/>
-
+		<mapping class="edu.rit.csh.models.BorrowPeriod"/>
     </session-factory>
 
 </hibernate-configuration>

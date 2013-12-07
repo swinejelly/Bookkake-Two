@@ -8,6 +8,7 @@ import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -33,6 +34,8 @@ public class Book implements Serializable{
 	private String isbn;
 	
 	private String ownerUID;
+	
+	private BorrowPeriod borrowPeriod;
 	
 	private boolean active = true;
 	
@@ -186,6 +189,15 @@ public class Book implements Serializable{
 		this.ownerUID = ownerUID;
 	}
 	
+	@OneToOne(optional = true)
+	public BorrowPeriod getBorrowPeriod() {
+		return borrowPeriod;
+	}
+
+	public void setBorrowPeriod(BorrowPeriod borrowPeriod) {
+		this.borrowPeriod = borrowPeriod;
+	}
+
 	/**
 	 * Automatically gets the owner using a LDAP connection
 	 * to CSH's LDAP server.
