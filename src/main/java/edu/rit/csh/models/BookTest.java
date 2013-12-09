@@ -2,6 +2,7 @@ package edu.rit.csh.models;
 
 import static org.junit.Assert.*;
 
+import java.util.Calendar;
 import java.util.List;
 
 import org.hibernate.Query;
@@ -32,6 +33,8 @@ public class BookTest {
 		sess.beginTransaction();
 		Query qry = sess.createQuery("delete from Book");
 		qry.executeUpdate();
+		Query qry2 = sess.createQuery("delete from BorrowPeriod");
+		qry2.executeUpdate();
 		sess.getTransaction().commit();
 		sess.close();
 	}
@@ -54,6 +57,52 @@ public class BookTest {
 		for (Book b: results){
 			System.out.printf("%d:%s belongs to %s\n", b.getId(), b.getIsbn(), b.getOwnerUID());
 		}
+	}
+	
+	@Test 
+	public void testGetPossessedBooks(){
+		Session session = sessFact.openSession();
+		session.beginTransaction();
+		Book.createBook(session, "0486295060", "5678");
+		Book.createBook(session, "1604598913", "1234");
+		Book.createBook(session, "9780807208847", "5678");
+		Book.createBook(session, "9780142409848", "4321");
+		
+		session.getTransaction().commit();
+		session.close();
+		
+		session = sessFact.openSession();
+		session.beginTransaction();
+		List<Book> results1234 = Book.getOwnedBooks(session, "1234");
+		List<Book> results5678 = Book.getOwnedBooks(session, "5678");
+		List<Book> results4321 = Book.getOwnedBooks(session, "4321");
+		//should return empty list.
+		List<Book> results9999 = Book.getOwnedBooks(session, "9999");
+		assertNotNull(results1234);
+		assertNotNull(results5678);
+		assertNotNull(results4321);
+		assertNotNull(results9999);
+		
+		assertEquals(1, results1234.size());
+		assertEquals(2, results5678.size());
+		assertEquals(1, results4321.size());
+		assertEquals(0, results9999.size());
+		Book borrowBook = results1234.get(0);
+		Calendar start = Calendar.getInstance(), end = Calendar.getInstance(), mid = Calendar.getInstance();
+		start.setTimeInMillis(1000000);
+		end.setTimeInMillis(2000000);
+		mid.setTimeInMillis(1500000);
+		borrowBook.borrow(session, "5678", start, end);
+		List<Book> afterBorrow1234 = Book.getPossessedBooks(session, mid, "1234");
+		List<Book> afterBorrow5678 = Book.getPossessedBooks(session, mid, "5678");
+		List<Book> afterBorrow4321 = Book.getPossessedBooks(session, mid, "4321");
+		assertEquals(0, afterBorrow1234.size());
+		assertEquals(3, afterBorrow5678.size());
+		assertEquals(1, afterBorrow4321.size());
+		
+		session.getTransaction().commit();
+		session.close();
+		
 	}
 
 	@Test
@@ -205,5 +254,34 @@ public class BookTest {
 		List<Book> noBooks = Book.getBooksByIsbn(testSess, "1604598913");
 		assertNotNull(noBooks);
 		assertEquals(0, noBooks.size());
+	}
+	
+	@Test
+	public void testBorrow(){
+		String isbn = "9780807208847";
+		String ownerUID = "1234";
+		Session createSess = sessFact.openSession();
+		createSess.beginTransaction();
+		Book b = Book.createBook(createSess, isbn, ownerUID);
+		b.delete(createSess);
+		createSess.getTransaction().commit();
+		createSess.close();
+		
+		Session testSess = sessFact.openSession();
+		testSess.beginTransaction();
+		Query qry = testSess.createQuery("from Book where isbn = :isbn");
+		qry.setParameter("isbn", isbn);
+		Book b1 = (Book)qry.uniqueResult();
+		//defaults to time of running
+		Calendar begin = Calendar.getInstance();
+		//defaults to time of running + 4 days
+		Calendar end = Calendar.getInstance();
+		end.add(Calendar.DAY_OF_YEAR, 4);
+		b1.borrow(testSess, "5678", begin, end);
+		
+		assertNotNull(b1.getBorrowPeriod());
+		assertNotNull(b1.getBorrowPeriod().getBook());
+		assertEquals("5678", b1.getBorrowPeriod().getBorrowerUID());
+		
 	}
 }

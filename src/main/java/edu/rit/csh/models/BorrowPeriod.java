@@ -1,5 +1,6 @@
 package edu.rit.csh.models;
 
+import java.io.Serializable;
 import java.util.Calendar;
 
 import javax.persistence.Entity;
@@ -13,8 +14,12 @@ import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name = "BORROWPERIODS")
-public class BorrowPeriod {
+public class BorrowPeriod implements Serializable{
+	private static final long serialVersionUID = -7918607058390393881L;
+
 	private long id;
+	
+	private String borrowerUID;
 	
 	private Calendar begin, end;
 	
@@ -38,6 +43,14 @@ public class BorrowPeriod {
 	@SuppressWarnings("unused")
 	private void setId(Long id){
 		this.id = id;
+	}
+
+	public String getBorrowerUID() {
+		return borrowerUID;
+	}
+
+	public void setBorrowerUID(String borrowerUID) {
+		this.borrowerUID = borrowerUID;
 	}
 
 	@Type(type = "calendar_date")

@@ -2,7 +2,9 @@ package edu.rit.csh.models;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.persistence.Entity;
@@ -133,6 +135,78 @@ public class Book implements Serializable{
 		return ownedBooks;
 	}
 	
+	/**
+	 * Return all books belonging to the user possessorUID or that are 
+	 * currently being borrowed by possessorUID.
+	 * @return list of all books possessed by user.
+	 */
+	public static List<Book> getPossessedBooks(String possessorUID){
+		return getPossessedBooks(possessorUID, Calendar.getInstance());
+	}
+	
+	/**
+	 * Return all books belonging to the user possessorUID or that are 
+	 * being borrowed by possessorUID at time when.
+	 * @return list of all books possessed by user.
+	 */
+	public static List<Book> getPossessedBooks(String possessorUID, Calendar when){
+		SessionFactory fact = WicketApplication.getWicketApplication().getSessionFactory();
+		Session sess = fact.openSession();
+		sess.beginTransaction();
+		List<Book> possessedBooks = getPossessedBooks(sess, when, possessorUID);
+		sess.getTransaction().commit();
+		sess.close();
+		return possessedBooks;
+	}
+	
+	/**
+	 * Return all books belonging to the user possessorUID or that are 
+	 * being borrowed by possessorUID at time when
+	 * @return list of all books possessed by user.
+	 */
+	public static List<Book> getPossessedBooks(Session sess, String possessorUID){
+		return getPossessedBooks(sess, Calendar.getInstance(), possessorUID);
+	}
+	
+	/**
+	 * Return all books belonging to the user possessorUID or that are 
+	 * being borrowed by possessorUID at time when
+	 * @return list of all books possessed by user.
+	 */
+	public static List<Book> getPossessedBooks(Session sess, Calendar when, String possessorUID){
+		Query qry = sess.createQuery("from Book where (ownerUID = :uid or borrowPeriod != null) and active = true");
+		qry.setParameter("uid", possessorUID);
+		List<Book> books = qry.list();
+		Iterator<Book> iter = books.iterator();
+		while (iter.hasNext()){
+			Book b = iter.next();
+			if (b.getOwnerUID().equals(possessorUID) && b.borrowPeriod == null){
+				//Book belongs to possessorUID and has no associated BorrowPeriod
+				continue;
+			}else if (b.getOwnerUID().equals(possessorUID) && b.borrowPeriod != null){
+				//if the book has an associated BorrowPeriod we need to verify that
+				//the book is not currently lent out.
+				int beginComp = b.borrowPeriod.getBegin().compareTo(when);
+				int endComp = b.borrowPeriod.getEnd().compareTo(when);
+				if ((beginComp <= 0) && (endComp >= 0)){
+					iter.remove();
+				}
+			}else if (!b.getOwnerUID().equals(possessorUID) && b.borrowPeriod.getBorrowerUID().equals(possessorUID)){
+				//if the book does not belong to possessorUID (implying it has a BorrowPeriod)
+				//then we should exclude it unless it coincides with b.borrowPeriod
+				int beginComp = b.borrowPeriod.getBegin().compareTo(when);
+				int endComp = b.borrowPeriod.getEnd().compareTo(when);
+				if (!(beginComp <= 0) || !(endComp >= 0)){
+					iter.remove();
+				}
+			}else{
+				//book neither belongs to possessorUID nor has a BorrowPeriod by possessorUID
+				iter.remove();
+			}
+		}
+		return books;
+	}
+	
 	public static List<Book> getBooksByIsbn(String isbn){
 		Session sess = WicketApplication.getWicketApplication().getSessionFactory().openSession();
 		sess.beginTransaction();
@@ -159,6 +233,24 @@ public class Book implements Serializable{
 	
 	public void delete(Session sess){
 		setActive(false);
+	}
+	
+	public void borrow(String borrowerUID, Calendar begin, Calendar end){
+		Session sess = WicketApplication.getWicketApplication().getSessionFactory().openSession();
+		sess.beginTransaction();
+		sess.update(this);
+		borrow(sess, borrowerUID, begin, end);
+		sess.getTransaction().commit();
+		sess.close();
+	}
+	
+	public void borrow(Session sess, String borrowerUID, Calendar begin, Calendar end){
+		borrowPeriod = new BorrowPeriod();
+		borrowPeriod.setBorrowerUID(borrowerUID);
+		borrowPeriod.setBegin(begin);
+		borrowPeriod.setEnd(end);
+		borrowPeriod.setBook(this);
+		sess.save(borrowPeriod);
 	}
 	
 	@Id
@@ -194,7 +286,7 @@ public class Book implements Serializable{
 		return borrowPeriod;
 	}
 
-	public void setBorrowPeriod(BorrowPeriod borrowPeriod) {
+	private void setBorrowPeriod(BorrowPeriod borrowPeriod) {
 		this.borrowPeriod = borrowPeriod;
 	}
 
@@ -217,6 +309,27 @@ public class Book implements Serializable{
 	 */
 	public void setOwner(LDAPUser newOwner){
 		ownerUID = newOwner.getUidnumber();
+	}
+	
+	/**
+	 * Returns the possessor of the Book on date using a connection to
+	 * CSH's LDAP server.
+	 * @return the possessing LDAPUser if successful, else null
+	 */
+	@Transient
+	public LDAPUser getPossessor(Calendar date){
+		try{
+			if (borrowPeriod == null){
+				return getOwner();
+			}else if (borrowPeriod.getBegin().compareTo(date) <= 0 &&
+				borrowPeriod.getEnd().compareTo(date) >= 0){
+				return WicketApplication.getWicketApplication().getLDAPProxy().getUser(ownerUID);
+			}else{
+				return getOwner();
+			}
+		} catch (LdapException | IOException | CursorException e) {
+			return null;
+		}
 	}
 
 	public boolean isActive() {
