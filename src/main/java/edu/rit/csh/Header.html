@@ -8,12 +8,12 @@
 			<a class="active item" wicket:id="homeLink"><i class="home icon"></i>Home</a> 
 			<a class="item"><i class="book icon"></i>Library</a>
 			<div class="right menu">
-				<div class="item">
+				<form wicket:id="switchUser" method="POST" class="item">
 					<div class="ui icon input">
-						<input type="text" placeholder="Search..."> <i
-							class="search link icon"></i>
+						<input wicket:id="uidInput" type="text" placeholder="Switch UID (dev only)">
+						<input type="submit" value="Switch">
 					</div>
-				</div>
+				</form>
 			</div>
 		</div>
 	</wicket:panel>
