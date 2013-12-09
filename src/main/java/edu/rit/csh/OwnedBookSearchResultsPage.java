@@ -1,6 +1,7 @@
 package edu.rit.csh;
 
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import edu.rit.csh.auth.LDAPUser;
+import edu.rit.csh.auth.UserWebSession;
 import edu.rit.csh.models.Book;
 import edu.rit.csh.models.BookInfo;
 
@@ -101,6 +103,18 @@ public class OwnedBookSearchResultsPage extends PageTemplate {
 			dateField.add(new DatePicker());
 			add(dateField);
 			setOutputMarkupId(true);
+		}
+		
+		@Override
+		public void onSubmit(){
+			setResponsePage(HomePage.class);
+			Book b = (Book)getParent().getDefaultModelObject();
+			Calendar begin = Calendar.getInstance();
+			Calendar end = Calendar.getInstance();
+			end.setTime(date);
+			UserWebSession sess = (UserWebSession)this.getSession();
+			String uid = sess.getUser().getUidnumber();
+			b.borrow(uid, begin, end);
 		}
 	}
 }

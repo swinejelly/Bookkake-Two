@@ -77,7 +77,7 @@ public class HomePage extends PageTemplate {
 		add(searchBookLink);
 		
 		String uidNum = ((UserWebSession)getSession()).getUser().getUidnumber();
-		List<Book> userBooks = Book.getOwnedBooks(uidNum);
+		List<Book> userBooks = Book.getPossessedBooks(uidNum);
 		final List<BookInfo> bookInfos = new ArrayList<BookInfo>();
 		for (Book b: userBooks){
 			BookInfo info = BookInfo.getBookInfo(b.getIsbn());
