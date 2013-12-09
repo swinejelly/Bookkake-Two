@@ -17,14 +17,28 @@
 								<th>Actions</th>
 							</tr>
 						</thead>
-						<tr wicket:id="books">
+						<tr wicket:id="ownedPossessedBooks">
 							<td wicket:id="title"></td>
 							<td></td>
 							<td>
 								<a wicket:id="delete">Delete</a>
 							</td>
 						</tr>
-					</table>		    
+						<tr wicket:id="borrowedBooks">
+							<td wicket:id="title"></td>
+							<td>Borrowed from ~someone~</td>
+							<td>
+								<a wicket:id="return">Return</a>
+							</td>
+						</tr>
+						<tr wicket:id="lentBooks">
+							<td wicket:id="title"></td>
+							<td>Lent out to ~someone~</td>
+							<td>
+								<a wicket:id="return">Return</a>
+							</td>
+						</tr>
+					</table>
 					<a wicket:id="addBookLink">Add Book</a>
 					<a wicket:id="searchBookLink">Borrow Book</a>
 			    </div>

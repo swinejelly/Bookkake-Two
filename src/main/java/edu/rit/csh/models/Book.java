@@ -384,4 +384,14 @@ public class Book implements Serializable{
 		}
 		return model;
 	}
+	
+	@Override
+	public boolean equals(Object o){
+		if (o instanceof Book){
+			Book other = (Book)o;
+			return isbn.equals(other.isbn);
+		}else{
+			return false;
+		}
+	}
 }
