@@ -30,6 +30,11 @@ import edu.rit.csh.auth.LDAPUser;
 @Table(name = "BOOKS")
 public class Book implements Serializable{
 	private static final long serialVersionUID = -8012947208250080965L;
+	
+	private static SessionFactory sessFact;
+	public static void setSessFact(SessionFactory fact){
+		sessFact = fact;
+	}
 
 	private Long id;
 	
@@ -50,58 +55,37 @@ public class Book implements Serializable{
 		this.setOwnerUID(uid);
 	}
 	
-	public static Book getBook(String isbn, String ownerUID){
-		SessionFactory fact = WicketApplication.getWicketApplication().getSessionFactory();
-		Session sess = fact.openSession();
-		sess.beginTransaction();
-		Book b = getBook(sess, isbn, ownerUID);
-		sess.close();
-		return b;
-	}
-	
 	/**
 	 * Get the book with the given isbn belonging to the user identified
-	 * by ownerUID
-	 * @param sess an open hibernate session with a transaction started. 
-	 * Caller assumes responsibility for closing and committing.
+	 * by ownerUID. Returns inactive ("deleted") books too, but these
+	 * can be differentiated by the active field.
 	 * @param isbn isbn of the book. must be an exact match.
 	 * @return A book if found, else null.
 	 */
-	public static Book getBook(Session sess, String isbn, String ownerUID){
+	public static Book getBook(String isbn, String ownerUID){
+		Session sess = sessFact.openSession();
+		sess.beginTransaction();
 		Query qry = sess.createQuery("from Book where isbn = :isbn and ownerUID = :uid");
 		qry.setParameter("isbn", isbn);
 		qry.setParameter("uid", ownerUID);
 		Book b = (Book) qry.uniqueResult();
-		return b;
-	}
-
-	/**
-	 * Creates a book using a session from the WicketApplication's
-	 * SessionFactory. Requires the app to be running.
-	 * @param sess Hibernate Session
-	 * @param isbn ISBN code
-	 * @param ownerUID LDAP UID of the user.
-	 */
-	public static Book createBook(String isbn, String ownerUID){
-		SessionFactory fact = WicketApplication.getWicketApplication().getSessionFactory();
-		Session sess = fact.openSession();
-		sess.beginTransaction();
-		Book b = createBook(sess, isbn, ownerUID);
 		sess.getTransaction().commit();
 		sess.close();
 		return b;
 	}
-	
+
 	/**
-	 * Creates a book using the given (open) session.
-	 * Does not close or commit the transaction.
-	 * @param sess Hibernate Session
+	 * Creates a book.
 	 * @param isbn ISBN code
 	 * @param ownerUID LDAP UID of the user.
 	 */
-	public static Book createBook(Session sess, String isbn, String ownerUID){
+	public static Book createBook(String isbn, String ownerUID){
+		Session sess = sessFact.openSession();
+		sess.beginTransaction();
 		Book b = new Book(isbn, ownerUID);
 		sess.save(b);
+		sess.getTransaction().commit();
+		sess.close();
 		return b;
 	}
 	
@@ -112,26 +96,13 @@ public class Book implements Serializable{
 	 * @return list of all books owned (regardless of possession) by the user.
 	 */
 	public static List<Book> getOwnedBooks(String ownerUID){
-		SessionFactory fact = WicketApplication.getWicketApplication().getSessionFactory();
-		Session sess = fact.openSession();
+		Session sess = sessFact.openSession();
 		sess.beginTransaction();
-		List<Book> ownedBooks = getOwnedBooks(sess, ownerUID);
-		sess.getTransaction().commit();
-		sess.close();
-		return ownedBooks;
-	}
-	
-	/**
-	 * Returns all books returned by the user with UIDnumber ownerUID.
-	 * @param sess An opened session, which the caller assumes responsibility
-	 * for closing.
-	 * @param ownerUID UIDnumber of the user.
-	 * @return list of all books owned (regardless of possession) by the user.
-	 */
-	public static List<Book> getOwnedBooks(Session sess, String ownerUID){
 		Query qry = sess.createQuery("from Book where ownerUID = :uid and active = true");
 		qry.setParameter("uid", ownerUID);
 		List<Book> ownedBooks = qry.list();
+		sess.getTransaction().commit();
+		sess.close();
 		return ownedBooks;
 	}
 	
@@ -150,34 +121,13 @@ public class Book implements Serializable{
 	 * @return list of all books possessed by user.
 	 */
 	public static List<Book> getPossessedBooks(String possessorUID, Calendar when){
-		SessionFactory fact = WicketApplication.getWicketApplication().getSessionFactory();
-		Session sess = fact.openSession();
+		Session sess = sessFact.openSession();
 		sess.beginTransaction();
-		List<Book> possessedBooks = getPossessedBooks(sess, when, possessorUID);
-		sess.getTransaction().commit();
-		sess.close();
-		return possessedBooks;
-	}
-	
-	/**
-	 * Return all books belonging to the user possessorUID or that are 
-	 * being borrowed by possessorUID at time when
-	 * @return list of all books possessed by user.
-	 */
-	public static List<Book> getPossessedBooks(Session sess, String possessorUID){
-		return getPossessedBooks(sess, Calendar.getInstance(), possessorUID);
-	}
-	
-	/**
-	 * Return all books belonging to the user possessorUID or that are 
-	 * being borrowed by possessorUID at time when
-	 * @return list of all books possessed by user.
-	 */
-	public static List<Book> getPossessedBooks(Session sess, Calendar when, String possessorUID){
+		//List<Book> possessedBooks = getPossessedBooks(sess, when, possessorUID);
 		Query qry = sess.createQuery("from Book where (ownerUID = :uid or borrowPeriod != null) and active = true");
 		qry.setParameter("uid", possessorUID);
-		List<Book> books = qry.list();
-		Iterator<Book> iter = books.iterator();
+		List<Book> possessedBooks = qry.list();
+		Iterator<Book> iter = possessedBooks.iterator();
 		while (iter.hasNext()){
 			Book b = iter.next();
 			if (b.getOwnerUID().equals(possessorUID) && b.borrowPeriod == null){
@@ -204,53 +154,54 @@ public class Book implements Serializable{
 				iter.remove();
 			}
 		}
-		return books;
-	}
-	
-	public static List<Book> getBooksByIsbn(String isbn){
-		Session sess = WicketApplication.getWicketApplication().getSessionFactory().openSession();
-		sess.beginTransaction();
-		List<Book> books = getBooksByIsbn(sess, isbn);
 		sess.getTransaction().commit();
 		sess.close();
-		return books;
+		return possessedBooks;
 	}
 	
-	public static List<Book> getBooksByIsbn(Session sess, String isbn){
+	/**
+	 * @param isbn the isbn of the book (doesn't convert between isbn10/13)
+	 * @return all active books that have isbn isbn
+	 */
+	public static List<Book> getBooksByIsbn(String isbn){
+		Session sess = sessFact.openSession();
+		sess.beginTransaction();
 		Query qry = sess.createQuery("from Book where isbn = :isbn and active = true");
 		qry.setParameter("isbn", isbn);
-		return qry.list();
+		List<Book> books = qry.list();
+		sess.getTransaction().commit();
+		sess.close();
+		return books;
 	}
 	
+	/**
+	 * Makes this book inactive so that it won't show up anymore
+	 * in the application.
+	 */
 	public void delete(){
-		Session sess = WicketApplication.getWicketApplication().getSessionFactory().openSession();
+		Session sess = sessFact.openSession();
 		sess.beginTransaction();
 		sess.update(this);
-		delete(sess);
-		sess.getTransaction().commit();
-		sess.close();
-	}
-	
-	public void delete(Session sess){
 		setActive(false);
-	}
-	
-	public void borrow(String borrowerUID, Calendar begin, Calendar end){
-		Session sess = WicketApplication.getWicketApplication().getSessionFactory().openSession();
-		sess.beginTransaction();
-		sess.update(this);
-		borrow(sess, borrowerUID, begin, end);
 		sess.getTransaction().commit();
 		sess.close();
 	}
 	
-	public void borrow(Session sess, String borrowerUID, Calendar begin, Calendar end){
+	/**
+	 * borrowerUID borrows a book from begin to end.
+	 */
+	public void borrow(String borrowerUID, Calendar begin, Calendar end){
+		Session sess = sessFact.openSession();
+		sess.beginTransaction();
+		sess.update(this);
 		borrowPeriod = new BorrowPeriod();
 		borrowPeriod.setBorrowerUID(borrowerUID);
 		borrowPeriod.setBegin(begin);
 		borrowPeriod.setEnd(end);
 		borrowPeriod.setBook(this);
 		sess.save(borrowPeriod);
+		sess.getTransaction().commit();
+		sess.close();
 	}
 	
 	@Id
@@ -383,15 +334,5 @@ public class Book implements Serializable{
 			}
 		}
 		return model;
-	}
-	
-	@Override
-	public boolean equals(Object o){
-		if (o instanceof Book){
-			Book other = (Book)o;
-			return isbn.equals(other.isbn);
-		}else{
-			return false;
-		}
 	}
 }

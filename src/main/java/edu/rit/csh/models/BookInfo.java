@@ -11,6 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,6 +25,10 @@ import edu.rit.csh.googlebooks.QueryExecutor;
 @Table(name="BOOKINFOS")
 public class BookInfo implements Serializable{
 	private static final long serialVersionUID = -271644167475844819L;
+	private static SessionFactory sessFact;
+	public static void setSessFact(SessionFactory fact){
+		sessFact = fact;
+	}
 	private String isbn = "";
 	private String title = "";
 	private String publisher = "";
@@ -75,28 +80,12 @@ public class BookInfo implements Serializable{
 	 * @return the BookInfo if retrievable, else null.
 	 */
 	public static BookInfo getBookInfo(String isbn){
-		Session sess = WicketApplication.getWicketApplication().getSessionFactory().openSession();
+		Session sess = sessFact.openSession();
 		sess.beginTransaction();
-		BookInfo b = getBookInfo(sess, isbn);
-		sess.getTransaction().commit();
-		sess.close();
-		return b;
-	}
-	
-	/**
-	 * Return the BookInfo for a given ISBN transparently,
-	 * first checking the database for a cached entry and otherwise
-	 * querying Google Books.
-	 * @param sess a hibernate session, which will not be closed or
-	 * committed.
-	 * @param isbn isbn10 or 13 of a book.
-	 * @return the BookInfo if retrievable, else null.
-	 */
-	public static BookInfo getBookInfo(Session sess, String isbn){
+		//Get the BookInfo from the database, if that fails try to get it
+		//from google books API and persist it.
 		BookInfo info = (BookInfo) sess.get(BookInfo.class, isbn);
-		if (info != null){
-			return info;
-		}else{
+		if (info == null){
 			GoogleBookISBNQuery qry = new GoogleBookISBNQuery(isbn);
 			try {
 				JSONObject obj = QueryExecutor.retrieveJSON(qry);
@@ -108,10 +97,6 @@ public class BookInfo implements Serializable{
 						JSONObject volumeInfo = bookJSON.getJSONObject("volumeInfo");
 						if (volumeInfo != null){
 							info = new BookInfo(volumeInfo);
-							if (info != null){
-								sess.save(info);
-								return info;
-							}
 						}
 					}
 				}
@@ -119,68 +104,61 @@ public class BookInfo implements Serializable{
 				e.printStackTrace();
 			}
 		}
-		return null;
+		
+		if (info != null){
+			sess.save(info);
+		}
+		
+		sess.getTransaction().commit();
+		sess.close();
+		return info;
 	}
-	
 	
 	public static List<BookInfo> searchBooks(String title, String author, int cap){
 		Session sess = WicketApplication.getWicketApplication().getSessionFactory().openSession();
 		sess.beginTransaction();
-		List<BookInfo> bookInfos = searchBooks(sess, title, author, cap);
-		sess.getTransaction().commit();
-		sess.close();
-		return bookInfos;
-	}
-	
-	/**
-	 * Search google's public Book API and return cap number of results.
-	 * @param sess hibernate session which will not be closed nor committed
-	 * @param title title search query. Required.
-	 * @param author author search query. Optional. (null or "")
-	 * @param cap maximum number of books to return.
-	 * @return
-	 */
-	public static List<BookInfo> searchBooks(Session sess, String title, String author, int cap){
+		//
 		List<BookInfo> books = new ArrayList<BookInfo>();
 		
 		GoogleBookAPIQuery qry = new GoogleBookAPIQuery();
 		qry.setTitle(title);
-		if (author != null){
+		if (author != null && !author.isEmpty()){
 			qry.setAuthor(author);
 		}
-		JSONObject json;
+		JSONObject json = null;
 		try{
 			json = QueryExecutor.retrieveJSON(qry);
 		}catch (IOException | JSONException e){
 			e.printStackTrace();
-			return books;
 		}
-		JSONArray bookObjects = json.optJSONArray("items");
-		if (bookObjects != null){
-			cap = Math.min(cap, bookObjects.length());
-			for (int i = 0; i < cap; i++){
-				JSONObject bookJSON = bookObjects.getJSONObject(i).getJSONObject("volumeInfo");
-				BookInfo info = new BookInfo(bookJSON);
-				if (!info.isbn.isEmpty()){
-					books.add(info);
+		if (json != null){
+			JSONArray bookObjects = json.optJSONArray("items");
+			if (bookObjects != null){
+				cap = Math.min(cap, bookObjects.length());
+				for (int i = 0; i < cap; i++){
+					JSONObject bookJSON = bookObjects.getJSONObject(i).getJSONObject("volumeInfo");
+					BookInfo info = new BookInfo(bookJSON);
+					if (!info.isbn.isEmpty()){
+						books.add(info);
+					}else{
+						cap = Math.min(cap + 1, bookObjects.length());
+					}
 				}
 			}
 		}
 		
-		return books;
-	}
-	
-	public static List<BookInfo> getAllBooks(){
-		Session sess = WicketApplication.getWicketApplication().getSessionFactory().openSession();
-		sess.beginTransaction();
-		List<BookInfo> books = getAllBooks(sess);
 		sess.getTransaction().commit();
 		sess.close();
 		return books;
 	}
 	
-	public static List<BookInfo> getAllBooks(Session sess){
-		return sess.createCriteria(BookInfo.class).list();
+	public static List<BookInfo> getAllBookInfos(){
+		Session sess = WicketApplication.getWicketApplication().getSessionFactory().openSession();
+		sess.beginTransaction();
+		List<BookInfo> books = sess.createCriteria(BookInfo.class).list();
+		sess.getTransaction().commit();
+		sess.close();
+		return books;
 	}
 	
 	@Id

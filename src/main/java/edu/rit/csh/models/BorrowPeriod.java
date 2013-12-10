@@ -9,6 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import org.hibernate.SessionFactory;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 
@@ -16,6 +17,10 @@ import org.hibernate.annotations.Type;
 @Table(name = "BORROWPERIODS")
 public class BorrowPeriod implements Serializable{
 	private static final long serialVersionUID = -7918607058390393881L;
+	private static SessionFactory sessFact;
+	public static void setSessFact(SessionFactory fact){
+		sessFact = fact;
+	}
 
 	private long id;
 	

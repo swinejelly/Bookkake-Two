@@ -17,6 +17,9 @@ public class BookInfoTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		sessFact = new Configuration().configure().buildSessionFactory();
+		Book.setSessFact(sessFact);
+		BookInfo.setSessFact(sessFact);
+		BorrowPeriod.setSessFact(sessFact);
 	}
 
 	@AfterClass
@@ -26,12 +29,8 @@ public class BookInfoTest {
 
 	@Test
 	public void testCaching() {
-		Session sess = sessFact.openSession();
-		sess.beginTransaction();
-		BookInfo preInfo1 = BookInfo.getBookInfo(sess, "9781604598919");
-		BookInfo preInfo2 = BookInfo.getBookInfo(sess, "9780142409848");
-		sess.getTransaction().commit();
-		sess.close();
+		BookInfo preInfo1 = BookInfo.getBookInfo("9781604598919");
+		BookInfo preInfo2 = BookInfo.getBookInfo("9780142409848");
 		
 		Session testSess = sessFact.openSession();
 		testSess.beginTransaction();

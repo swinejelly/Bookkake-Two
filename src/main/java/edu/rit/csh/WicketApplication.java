@@ -15,6 +15,9 @@ import org.hibernate.cfg.Configuration;
 import edu.rit.csh.auth.LDAPProxy;
 import edu.rit.csh.auth.LDAPUser;
 import edu.rit.csh.auth.UserWebSession;
+import edu.rit.csh.models.Book;
+import edu.rit.csh.models.BookInfo;
+import edu.rit.csh.models.BorrowPeriod;
 
 /**
  * Application object for your web application. If you want to run this application without deploying, run the Start class.
@@ -44,6 +47,9 @@ public class WicketApplication extends WebApplication
 	{
 		super.init();
 		sessionFactory = new Configuration().configure().buildSessionFactory();
+		Book.setSessFact(sessionFactory);
+		BookInfo.setSessFact(sessionFactory);
+		BorrowPeriod.setSessFact(sessionFactory);
 	}
 	
 	@Override

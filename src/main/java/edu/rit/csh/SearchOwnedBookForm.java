@@ -28,7 +28,7 @@ public class SearchOwnedBookForm extends Form {
 		super(id);
 		setDefaultModel(new CompoundPropertyModel<SearchOwnedBookForm>(this));
 		
-		bookInfos = BookInfo.getAllBooks();
+		bookInfos = BookInfo.getAllBookInfos();
 		List<String> titles = new ArrayList<String>(bookInfos.size());
 		for (BookInfo b: bookInfos){
 			titles.add(b.getTitle());

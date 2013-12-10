@@ -20,6 +20,9 @@ public class BookTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		sessFact = new Configuration().configure().buildSessionFactory();
+		Book.setSessFact(sessFact);
+		BookInfo.setSessFact(sessFact);
+		BorrowPeriod.setSessFact(sessFact);
 	}
 
 	@AfterClass
@@ -41,43 +44,35 @@ public class BookTest {
 
 	@Test
 	public void testPersistence() {
-		Session session = sessFact.openSession();
-		session.beginTransaction();
 		//Wealth of Nations
-		Book.createBook(session, "0486295060", "5678");
+		Book.createBook("0486295060", "5678");
 		//War of the Worlds
-		Book.createBook(session, "1604598913", "1234");
-		session.getTransaction().commit();
-		session.close();
+		Book.createBook("1604598913", "1234");
 		
-		session = sessFact.openSession();
+		Session session = sessFact.openSession();
 		session.beginTransaction();
 		List<Book> results = session.createQuery("from Book").list();
 		assertEquals(2, results.size());
 		for (Book b: results){
 			System.out.printf("%d:%s belongs to %s\n", b.getId(), b.getIsbn(), b.getOwnerUID());
 		}
+		session.getTransaction().commit();
+		session.close();
 	}
 	
 	@Test 
 	public void testGetPossessedBooks(){
-		Session session = sessFact.openSession();
-		session.beginTransaction();
-		Book.createBook(session, "0486295060", "5678");
-		Book.createBook(session, "1604598913", "1234");
-		Book.createBook(session, "9780807208847", "5678");
-		Book.createBook(session, "9780142409848", "4321");
+		Book.createBook("0486295060", "5678");
+		Book.createBook("1604598913", "1234");
+		Book.createBook("9780807208847", "5678");
+		Book.createBook("9780142409848", "4321");
 		
-		session.getTransaction().commit();
-		session.close();
 		
-		session = sessFact.openSession();
-		session.beginTransaction();
-		List<Book> results1234 = Book.getOwnedBooks(session, "1234");
-		List<Book> results5678 = Book.getOwnedBooks(session, "5678");
-		List<Book> results4321 = Book.getOwnedBooks(session, "4321");
+		List<Book> results1234 = Book.getOwnedBooks("1234");
+		List<Book> results5678 = Book.getOwnedBooks("5678");
+		List<Book> results4321 = Book.getOwnedBooks("4321");
 		//should return empty list.
-		List<Book> results9999 = Book.getOwnedBooks(session, "9999");
+		List<Book> results9999 = Book.getOwnedBooks("9999");
 		assertNotNull(results1234);
 		assertNotNull(results5678);
 		assertNotNull(results4321);
@@ -89,40 +84,31 @@ public class BookTest {
 		assertEquals(0, results9999.size());
 		Book borrowBook = results1234.get(0);
 		Calendar start = Calendar.getInstance(), end = Calendar.getInstance(), mid = Calendar.getInstance();
-		start.setTimeInMillis(1000000);
-		end.setTimeInMillis(2000000);
-		mid.setTimeInMillis(1500000);
-		borrowBook.borrow(session, "5678", start, end);
-		List<Book> afterBorrow1234 = Book.getPossessedBooks(session, mid, "1234");
-		List<Book> afterBorrow5678 = Book.getPossessedBooks(session, mid, "5678");
-		List<Book> afterBorrow4321 = Book.getPossessedBooks(session, mid, "4321");
+		start.setTimeInMillis(1000000000);
+		end.setTimeInMillis(2000000000);
+		mid.setTimeInMillis(1500000000);
+		borrowBook.borrow("5678", start, end);
+		List<Book> afterBorrow1234 = Book.getPossessedBooks("1234", mid);
+		List<Book> afterBorrow5678 = Book.getPossessedBooks("5678", mid);
+		List<Book> afterBorrow4321 = Book.getPossessedBooks("4321", mid);
 		assertEquals(0, afterBorrow1234.size());
 		assertEquals(3, afterBorrow5678.size());
 		assertEquals(1, afterBorrow4321.size());
-		
-		session.getTransaction().commit();
-		session.close();
 		
 	}
 
 	@Test
 	public void testGetOwnedBooks(){
-		Session session = sessFact.openSession();
-		session.beginTransaction();
-		Book.createBook(session, "0486295060", "5678");
-		Book.createBook(session, "1604598913", "1234");
-		Book.createBook(session, "9780807208847", "5678");
-		Book.createBook(session, "9780142409848", "4321");
-		session.getTransaction().commit();
-		session.close();
+		Book.createBook("0486295060", "5678");
+		Book.createBook("1604598913", "1234");
+		Book.createBook("9780807208847", "5678");
+		Book.createBook("9780142409848", "4321");
 		
-		session = sessFact.openSession();
-		session.beginTransaction();
-		List<Book> results1234 = Book.getOwnedBooks(session, "1234");
-		List<Book> results5678 = Book.getOwnedBooks(session, "5678");
-		List<Book> results4321 = Book.getOwnedBooks(session, "4321");
+		List<Book> results1234 = Book.getOwnedBooks("1234");
+		List<Book> results5678 = Book.getOwnedBooks("5678");
+		List<Book> results4321 = Book.getOwnedBooks("4321");
 		//should return empty list.
-		List<Book> results9999 = Book.getOwnedBooks(session, "9999");
+		List<Book> results9999 = Book.getOwnedBooks("9999");
 		assertNotNull(results1234);
 		assertNotNull(results5678);
 		assertNotNull(results4321);
@@ -139,17 +125,11 @@ public class BookTest {
 	 */
 	@Test
 	public void testGetOwnedBooksDeleted(){
-		Session createSess = sessFact.openSession();
-		createSess.beginTransaction();
-		Book.createBook(createSess, "9780807208847", "1234");
-		Book.createBook(createSess, "9780142409848", "1234").delete(createSess);
-		Book.createBook(createSess, "0486295060", "1234");
-		createSess.getTransaction().commit();
-		createSess.close();
+		Book.createBook("9780807208847", "1234");
+		Book.createBook("9780142409848", "1234").delete();
+		Book.createBook("0486295060", "1234");
 		
-		Session testSess = sessFact.openSession();
-		testSess.beginTransaction();
-		List<Book> books = Book.getOwnedBooks(testSess, "1234");
+		List<Book> books = Book.getOwnedBooks("1234");
 		assertEquals(2, books.size());
 	}
 	
@@ -160,49 +140,12 @@ public class BookTest {
 	public void testDelete(){
 		//create book
 		String isbn = "9780807208847";
-		Session createSess = sessFact.openSession();
-		createSess.beginTransaction();
-		Book.createBook(createSess, isbn, "1234");
-		createSess.getTransaction().commit();
-		createSess.close();
+		Book.createBook(isbn, "1234");
 		//get book and "delete" it
-		Session deleteSess = sessFact.openSession();
-		deleteSess.beginTransaction();
-		Query deleteQuery = deleteSess.createQuery("from Book where isbn = :isbn");
-		deleteQuery.setString("isbn", isbn);
-		Book deleteBook = (Book)deleteQuery.uniqueResult();
-		deleteBook.delete(deleteSess);
-		deleteSess.getTransaction().commit();
-		deleteSess.close();
+		Book deleteBook = Book.getBook(isbn, "1234");
+		deleteBook.delete();
 		//get book again and check that it's "deleted"
-		Session testSess = sessFact.openSession();
-		testSess.beginTransaction();
-		Query testQry = testSess.createQuery("from Book where isbn = :isbn");
-		testQry.setString("isbn", isbn);
-		Book testBook = (Book)testQry.uniqueResult();
-		assertFalse(testBook.isActive());
-	}
-	
-	/**
-	 * Verify that deleting books works when done in the same session the
-	 * book is created in.
-	 */
-	@Test
-	public void testDelete2(){
-		//create book
-		String isbn = "9780807208847";
-		Session createSess = sessFact.openSession();
-		createSess.beginTransaction();
-		Book b = Book.createBook(createSess, isbn, "1234");
-		b.delete(createSess);
-		createSess.getTransaction().commit();
-		createSess.close();
-		//get book again and check that it's "deleted"
-		Session testSess = sessFact.openSession();
-		testSess.beginTransaction();
-		Query testQry = testSess.createQuery("from Book where isbn = :isbn");
-		testQry.setString("isbn", isbn);
-		Book testBook = (Book)testQry.uniqueResult();
+		Book testBook = Book.getBook(isbn, "1234");
 		assertFalse(testBook.isActive());
 	}
 	
@@ -213,16 +156,11 @@ public class BookTest {
 	public void testGet(){
 		String isbn = "9780807208847";
 		String ownerUID = "1234";
-		Session createSess = sessFact.openSession();
-		createSess.beginTransaction();
-		Book b = Book.createBook(createSess, isbn, ownerUID);
-		b.delete(createSess);
-		createSess.getTransaction().commit();
-		createSess.close();
+		Book b = Book.createBook(isbn, ownerUID);
 		
 		Session testSess = sessFact.openSession();
 		testSess.beginTransaction();
-		Book bTest = Book.getBook(testSess, isbn, ownerUID);
+		Book bTest = Book.getBook(isbn, ownerUID);
 		assertNotNull(bTest);
 		assertEquals(isbn, bTest.getIsbn());
 		assertEquals(ownerUID, bTest.getOwnerUID());
@@ -235,23 +173,17 @@ public class BookTest {
 	public void testGetBooksByIsbn(){
 		String isbns[] = {"9780807208847", "0486295060", "0486295060"};
 		String uids[]  = {"1234",          "5678",          "1234"};
-		Session createSess = sessFact.openSession();
-		createSess.beginTransaction();
 		for (int i = 0; i < isbns.length; i++){
-			Book.createBook(createSess, isbns[i], uids[i]);
+			Book.createBook(isbns[i], uids[i]);
 		}
-		createSess.getTransaction().commit();
-		createSess.close();
 		
-		Session testSess = sessFact.openSession();
-		testSess.beginTransaction();
-		List<Book> books0486 = Book.getBooksByIsbn(testSess, "0486295060");
+		List<Book> books0486 = Book.getBooksByIsbn("0486295060");
 		assertEquals(2, books0486.size());
 		
-		List<Book> books9780 = Book.getBooksByIsbn(testSess, "9780807208847");
+		List<Book> books9780 = Book.getBooksByIsbn("9780807208847");
 		assertEquals(1, books9780.size());
 		
-		List<Book> noBooks = Book.getBooksByIsbn(testSess, "1604598913");
+		List<Book> noBooks = Book.getBooksByIsbn("1604598913");
 		assertNotNull(noBooks);
 		assertEquals(0, noBooks.size());
 	}
@@ -260,24 +192,17 @@ public class BookTest {
 	public void testBorrow(){
 		String isbn = "9780807208847";
 		String ownerUID = "1234";
-		Session createSess = sessFact.openSession();
-		createSess.beginTransaction();
-		Book b = Book.createBook(createSess, isbn, ownerUID);
-		b.delete(createSess);
-		createSess.getTransaction().commit();
-		createSess.close();
+		Book b = Book.createBook(isbn, ownerUID);
+		b.delete();
 		
-		Session testSess = sessFact.openSession();
-		testSess.beginTransaction();
-		Query qry = testSess.createQuery("from Book where isbn = :isbn");
-		qry.setParameter("isbn", isbn);
-		Book b1 = (Book)qry.uniqueResult();
-		//defaults to time of running
+		Book b1 = Book.getBook(isbn, ownerUID);
 		Calendar begin = Calendar.getInstance();
+		begin.setTimeInMillis(1000000);
 		//defaults to time of running + 4 days
 		Calendar end = Calendar.getInstance();
+		end.setTimeInMillis(2000000);
 		end.add(Calendar.DAY_OF_YEAR, 4);
-		b1.borrow(testSess, "5678", begin, end);
+		b1.borrow("5678", begin, end);
 		
 		assertNotNull(b1.getBorrowPeriod());
 		assertNotNull(b1.getBorrowPeriod().getBook());
