@@ -208,5 +208,7 @@ public class BookTest {
 		assertNotNull(b1.getBorrowPeriod().getBook());
 		assertEquals("5678", b1.getBorrowPeriod().getBorrowerUID());
 		
+		b1.removeBorrow();
+		assertNull(b1.getBorrowPeriod());
 	}
 }
