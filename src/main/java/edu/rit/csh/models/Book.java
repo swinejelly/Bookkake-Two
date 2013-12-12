@@ -204,6 +204,19 @@ public class Book implements Serializable{
 		sess.close();
 	}
 	
+	public void removeBorrow(){
+		Session sess = sessFact.openSession();
+		sess.beginTransaction();
+		sess.update(this);
+		if (borrowPeriod != null){
+			sess.delete(borrowPeriod);
+			borrowPeriod = null;
+			sess.save(this);
+		}
+		sess.getTransaction().commit();
+		sess.close();
+	}
+	
 	@Id
 	@GeneratedValue(generator="increment")
 	@GenericGenerator(name="increment", strategy="increment")
@@ -289,6 +302,15 @@ public class Book implements Serializable{
 
 	public void setActive(boolean active) {
 		this.active = active;
+	}
+	
+	@Override
+	public boolean equals(Object o){
+		if (o instanceof Book){
+			return isbn.equals(((Book)o).isbn);
+		}else{
+			return false;
+		}
 	}
 
 	public static HashMap<String, String> buildBookModel(JSONObject obj){
