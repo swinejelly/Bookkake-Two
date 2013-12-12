@@ -1,6 +1,7 @@
 package edu.rit.csh;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -11,6 +12,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.PropertyModel;
+
 import edu.rit.csh.auth.UserWebSession;
 import edu.rit.csh.models.Book;
 import edu.rit.csh.models.BookInfo;
@@ -77,43 +79,104 @@ public class HomePage extends PageTemplate {
 		add(searchBookLink);
 		
 		String uidNum = ((UserWebSession)getSession()).getUser().getUidnumber();
-		List<Book> userBooks = Book.getPossessedBooks(uidNum);
-		final List<BookInfo> bookInfos = new ArrayList<BookInfo>();
-		for (Book b: userBooks){
-			BookInfo info = BookInfo.getBookInfo(b.getIsbn());
-			if (info != null){
-				bookInfos.add(info);
-			}
-		}
-		final ListView<BookInfo> myBooks = 
-		new ListView<BookInfo>("books", bookInfos){
+		//List of all books OWNED by the user.
+		List<Book> userOwnedBooks = Book.getOwnedBooks(uidNum);
+		//List of all books POSSESSED by the user.
+		List<Book> userPossessedBooks = Book.getPossessedBooks(uidNum);
+		//List of all books OWNED AND POSSESSED by the user. Displayed.
+		//User can delete these books.
+		final List<Book> userOwnedPossessedBooks = new LinkedList<Book>(userOwnedBooks);
+		userOwnedPossessedBooks.retainAll(userPossessedBooks);
+		//List of all books LENT by the user. Displayed.
+		//User can mark these books as returned to themselves.
+		final List<Book> userLentBooks = new LinkedList<Book>(userOwnedBooks);
+		userLentBooks.removeAll(userPossessedBooks);
+		//List of all books BORROWED by the user. Displayed.
+		//User can mark these books as returned to the lender.
+		final List<Book> userBorrowedBooks = new LinkedList<Book>(userPossessedBooks);
+		userBorrowedBooks.removeAll(userOwnedBooks);
+		
+		final ListView<Book> ownedPossessedBooksView = 
+		new ListView<Book>("ownedPossessedBooks", userOwnedPossessedBooks){
 			private static final long serialVersionUID = -4592905416065301177L;
 
 			@Override
-			protected void populateItem(final ListItem<BookInfo> item) {
-				//turn on outputmarkupid for AJAX features (below)
-				item.setOutputMarkupId(true);
-				
+			protected void populateItem(final ListItem<Book> item) {
 				//Add title
-				item.add(new Label("title", new PropertyModel(item.getModel(), "title")));
+				item.add(new Label("title", new PropertyModel(item.getModel(), "bookInfo.title")));
 				
 				//Add link to delete book
-				final String isbn13 = ((BookInfo)item.getModelObject()).getIsbn();
-				final String ownerUID = ((UserWebSession)UserWebSession.get()).getUser().getUidnumber();
+				final String isbn13 = ((Book)item.getModelObject()).getIsbn();
+				final String ownerUID = ((Book)item.getModelObject()).getOwnerUID();
 				item.add(new AjaxFallbackLink("delete"){
 					private static final long serialVersionUID = 589193295987221975L;
 						@Override
 						public void onClick(AjaxRequestTarget target) {
 							Book.getBook(isbn13, ownerUID).delete();
-							bookInfos.remove(item.getModelObject());
-							//parent is myBooks
-							target.add(HomePage.this);
+							setResponsePage(HomePage.class);
 						}
 				});
 				
 			}
 		};
-		myBooks.setOutputMarkupId(true);
-		add(myBooks);
+		ownedPossessedBooksView.setOutputMarkupId(true);
+		add(ownedPossessedBooksView);
+		
+		final ListView<Book> borrowedBooksView =
+		new ListView<Book>("borrowedBooks", userBorrowedBooks){
+			private static final long serialVersionUID = 2736041904670215404L;
+
+			@Override
+			protected void populateItem(final ListItem<Book> item) {
+				//add title
+				item.add(new Label("title", new PropertyModel(item.getModel(), "bookInfo.title")));
+				
+				final String isbn13 = ((Book)item.getModelObject()).getIsbn();
+				final String ownerUID = ((Book)item.getModelObject()).getOwnerUID();
+				//Add link to return book to other user.
+				item.add(new AjaxFallbackLink("return"){
+					private static final long serialVersionUID = -7032759365273183041L;
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						Book.getBook(isbn13, ownerUID).removeBorrow();
+						setResponsePage(HomePage.class);
+					}
+					
+				});
+				
+			}
+		};
+		borrowedBooksView.setOutputMarkupId(true);
+		add(borrowedBooksView);
+		
+		final ListView<Book> lentBooksView =
+				new ListView<Book>("lentBooks", userLentBooks){
+					private static final long serialVersionUID = 2736041904670215404L;
+
+					@Override
+					protected void populateItem(final ListItem<Book> item) {
+						//add title
+						item.add(new Label("title", new PropertyModel(item.getModel(), "bookInfo.title")));
+						
+						final String isbn13 = ((Book)item.getModelObject()).getIsbn();
+						final String ownerUID = ((Book)item.getModelObject()).getOwnerUID();
+						//Add link to return book to other user.
+						item.add(new AjaxFallbackLink("return"){
+							private static final long serialVersionUID = -7032759365273183041L;
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								Book.getBook(isbn13, ownerUID).removeBorrow();
+								setResponsePage(HomePage.class);
+							}
+							
+						});
+						
+					}
+				};
+				lentBooksView.setOutputMarkupId(true);
+				add(lentBooksView);
+
 	}
 }

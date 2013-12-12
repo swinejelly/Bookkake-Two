@@ -45,7 +45,7 @@ public class BookTest {
 	@Test
 	public void testPersistence() {
 		//Wealth of Nations
-		Book.createBook("0486295060", "5678");
+		Book.createBook("9780857081087", "5678");
 		//War of the Worlds
 		Book.createBook("1604598913", "1234");
 		
@@ -62,9 +62,9 @@ public class BookTest {
 	
 	@Test 
 	public void testGetPossessedBooks(){
-		Book.createBook("0486295060", "5678");
-		Book.createBook("1604598913", "1234");
-		Book.createBook("9780807208847", "5678");
+		Book.createBook("9780857081087", "5678");
+		Book.createBook("9781439516881", "1234");
+		Book.createBook("9781439516881", "5678");
 		Book.createBook("9780142409848", "4321");
 		
 		
@@ -99,9 +99,9 @@ public class BookTest {
 
 	@Test
 	public void testGetOwnedBooks(){
-		Book.createBook("0486295060", "5678");
-		Book.createBook("1604598913", "1234");
-		Book.createBook("9780807208847", "5678");
+		Book.createBook("9780857081087", "5678");
+		Book.createBook("9781439516881", "1234");
+		Book.createBook("9781439516881", "5678");
 		Book.createBook("9780142409848", "4321");
 		
 		List<Book> results1234 = Book.getOwnedBooks("1234");
@@ -125,9 +125,9 @@ public class BookTest {
 	 */
 	@Test
 	public void testGetOwnedBooksDeleted(){
-		Book.createBook("9780807208847", "1234");
+		Book.createBook("9781439516881", "1234");
 		Book.createBook("9780142409848", "1234").delete();
-		Book.createBook("0486295060", "1234");
+		Book.createBook("9780857081087", "1234");
 		
 		List<Book> books = Book.getOwnedBooks("1234");
 		assertEquals(2, books.size());
@@ -139,7 +139,7 @@ public class BookTest {
 	@Test
 	public void testDelete(){
 		//create book
-		String isbn = "9780807208847";
+		String isbn = "9781439516881";
 		Book.createBook(isbn, "1234");
 		//get book and "delete" it
 		Book deleteBook = Book.getBook(isbn, "1234");
@@ -154,12 +154,10 @@ public class BookTest {
 	 */
 	@Test
 	public void testGet(){
-		String isbn = "9780807208847";
+		String isbn = "9781439516881";
 		String ownerUID = "1234";
 		Book b = Book.createBook(isbn, ownerUID);
 		
-		Session testSess = sessFact.openSession();
-		testSess.beginTransaction();
 		Book bTest = Book.getBook(isbn, ownerUID);
 		assertNotNull(bTest);
 		assertEquals(isbn, bTest.getIsbn());
@@ -171,16 +169,16 @@ public class BookTest {
 	 */
 	@Test
 	public void testGetBooksByIsbn(){
-		String isbns[] = {"9780807208847", "0486295060", "0486295060"};
+		String isbns[] = {"9781439516881", "9780857081087", "9780857081087"};
 		String uids[]  = {"1234",          "5678",          "1234"};
 		for (int i = 0; i < isbns.length; i++){
 			Book.createBook(isbns[i], uids[i]);
 		}
 		
-		List<Book> books0486 = Book.getBooksByIsbn("0486295060");
+		List<Book> books0486 = Book.getBooksByIsbn("9780857081087");
 		assertEquals(2, books0486.size());
 		
-		List<Book> books9780 = Book.getBooksByIsbn("9780807208847");
+		List<Book> books9780 = Book.getBooksByIsbn("9781439516881");
 		assertEquals(1, books9780.size());
 		
 		List<Book> noBooks = Book.getBooksByIsbn("1604598913");
@@ -190,7 +188,7 @@ public class BookTest {
 	
 	@Test
 	public void testBorrow(){
-		String isbn = "9780807208847";
+		String isbn = "9781439516881";
 		String ownerUID = "1234";
 		Book b = Book.createBook(isbn, ownerUID);
 		b.delete();
@@ -210,5 +208,21 @@ public class BookTest {
 		
 		b1.removeBorrow();
 		assertNull(b1.getBorrowPeriod());
+	}
+	
+	@Test
+	public void testBookInfoAssoc(){
+		String isbn = "9781439516881";
+		String owner1 = "1234";
+		String owner2 = "5678";
+		Book b1 = Book.createBook(isbn, owner1);
+		Book b2 = Book.createBook(isbn, owner2);
+		
+		BookInfo info = BookInfo.getBookInfo(isbn);
+		assertNotNull(info);
+		assertNotNull(info.getBooks());
+		assertEquals(2, info.getBooks().size());
+		assertTrue(info.getBooks().contains(b1));
+		assertTrue(info.getBooks().contains(b2));
 	}
 }

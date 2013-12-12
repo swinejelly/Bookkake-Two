@@ -7,9 +7,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -44,6 +46,8 @@ public class Book implements Serializable{
 	
 	private BorrowPeriod borrowPeriod;
 	
+	private BookInfo bookInfo;
+
 	private boolean active = true;
 	
 	public Book(){
@@ -53,6 +57,7 @@ public class Book implements Serializable{
 	public Book(String isbn, String uid){
 		this.setIsbn(isbn);
 		this.setOwnerUID(uid);
+		bookInfo = BookInfo.getBookInfo(isbn);
 	}
 	
 	/**
@@ -252,6 +257,15 @@ public class Book implements Serializable{
 
 	private void setBorrowPeriod(BorrowPeriod borrowPeriod) {
 		this.borrowPeriod = borrowPeriod;
+	}
+	
+	@ManyToOne(optional = false, cascade = {CascadeType.PERSIST})
+	public BookInfo getBookInfo() {
+		return bookInfo;
+	}
+
+	public void setBookInfo(BookInfo bookInfo) {
+		this.bookInfo = bookInfo;
 	}
 
 	/**
