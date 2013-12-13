@@ -4,48 +4,61 @@
 	</head>
 	<body>
 		<wicket:extend>
-			<h1>Welcome to Bookkake!</h1>
+			<br>
+			<div class="ui grid">
+				<div class="one wide column"></div>
+				<div class="fourteen wide column">
+					<div class="ui raised blue segment">
+						<h1 class="ui header">Welcome to Bookkake!</h1>
+					</div>
+				</div>
+			</div>
+			<br>
 			<div class="ui grid">
 				<div class="one wide column"></div>
 				<div class="nine wide column">
-					<h2 class="ui center aligned header">Your Books</h2>
-					<table class="ui table segment">
-						<thead>
-							<tr>
-								<th>Book</th>
-								<th>Availability</th>
-								<th>Actions</th>
+					<div class="ui segment">
+						<h2 class="ui center aligned header">Your Books</h2>
+						<table class="ui table segment">
+							<thead>
+								<tr>
+									<th>Book</th>
+									<th>Availability</th>
+									<th>Actions</th>
+								</tr>
+							</thead>
+							<tr wicket:id="ownedPossessedBooks">
+								<td wicket:id="title"></td>
+								<td></td>
+								<td>
+									<a class="mini red ui button" wicket:id="delete">Delete</a>
+								</td>
 							</tr>
-						</thead>
-						<tr wicket:id="ownedPossessedBooks">
-							<td wicket:id="title"></td>
-							<td></td>
-							<td>
-								<a wicket:id="delete">Delete</a>
-							</td>
-						</tr>
-						<tr wicket:id="borrowedBooks">
-							<td wicket:id="title"></td>
-							<td>Borrowed from ~someone~</td>
-							<td>
-								<a wicket:id="return">Return</a>
-							</td>
-						</tr>
-						<tr wicket:id="lentBooks">
-							<td wicket:id="title"></td>
-							<td>Lent to ~someone~</td>
-							<td>
-								<a wicket:id="return">Return</a>
-							</td>
-						</tr>
-					</table>		    
-					<a wicket:id="addBookLink">Add Book</a>
-					<a wicket:id="searchBookLink">Borrow Book</a>
+							<tr wicket:id="borrowedBooks">
+								<td wicket:id="title"></td>
+								<td>Borrowed from ~someone~</td>
+								<td>
+									<a class="mini blue ui button" wicket:id="return">Return</a>
+								</td>
+							</tr>
+							<tr wicket:id="lentBooks">
+								<td wicket:id="title"></td>
+								<td>Lent to ~someone~</td>
+								<td>
+									<a class="mini blue ui button" wicket:id="return">Return</a>
+								</td>
+							</tr>
+						</table>		    
+						<a wicket:id="addBookLink" class="ui green button">Add Book</a>
+						<a wicket:id="searchBookLink" class="ui orange button">Borrow Book</a>
+				    </div>
 			    </div>
 			    <div class="five wide column">
-					<h2 class="ui center aligned header">Actions</h2>
-					<div wicket:id="action">
-					
+			    	<div class="ui segment">
+						<h2 class="ui center aligned header">Action</h2>
+						<div wicket:id="action">
+						
+						</div>
 					</div>		    
 			    </div>
 			    <div class="one wide column"></div>

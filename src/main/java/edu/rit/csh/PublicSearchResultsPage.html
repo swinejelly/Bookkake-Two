@@ -4,41 +4,41 @@
 	</header>
 	<body>
 		<wicket:extend>
-			This is the PublicSearchResultsPage.
 			<br>
-			The title string was <label wicket:id="title"></label>.<br>
-			The author string was <label wicket:id="author"></label>.<br>
-			The query returned <label wicket:id="numItems"></label>.<br>			
-			
-			<table class="ui table segment" wicket:enclosure="books">
-				<thead>
-					<tr>
-						<th class="two wide">Cover</th>
-						<th class="four wide">Info</th>
-						<th class="eight wide">Description</th>
-						<th class="two wide">Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr wicket:id="books">
-						<td><img wicket:id="img"></img></td>
-						<td>
-							<h2 wicket:id="title"></h2>
-							<h3 wicket:id="authors"></h3>
-							<h4 wicket:id="publisher"></h4>
-						</td>
-						<td wicket:id="description">
-						</td>
-						<td>
-							<form wicket:id="actions" id="actions" method="post">
-								<input type="submit" name="addBook" value="Add Book!" 
-									class="ui blue submit button">
-							</form>
-						</td>
-					</tr>
-				</tbody>
-			</table>
-						
+			<div class="ui segment">
+				<h1 class="ui header">
+					Search Results
+					<div class="sub header">Pick the book that matches your own.</div>
+				</h1>
+				<table class="ui table segment" wicket:enclosure="books">
+					<thead>
+						<tr>
+							<th class="two wide">Cover</th>
+							<th class="four wide">Info</th>
+							<th class="eight wide">Description</th>
+							<th class="two wide">Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr wicket:id="books">
+							<td><img wicket:id="img"></img></td>
+							<td>
+								<h2 wicket:id="title"></h2>
+								<h3 wicket:id="authors"></h3>
+								<h4 wicket:id="publisher"></h4>
+							</td>
+							<td wicket:id="description">
+							</td>
+							<td>
+								<form wicket:id="actions" id="actions" method="post">
+									<input type="submit" name="addBook" value="Add Book!" 
+										class="ui blue submit button">
+								</form>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
 		</wicket:extend>
 	</body>
 </html>

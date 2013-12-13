@@ -100,7 +100,7 @@ public class OwnedBookSearchResultsPage extends PageTemplate {
 			DateTextField dateField = new DateTextField("date",
 					new PropertyModel<Date>(this, "date"),
 					new StyleDateConverter(false));
-			dateField.add(new DatePicker());
+			dateField.add(new DatePicker().setShowOnFieldClick(true).setAutoHide(true));
 			add(dateField);
 			setOutputMarkupId(true);
 		}

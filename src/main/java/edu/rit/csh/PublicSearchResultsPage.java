@@ -28,53 +28,48 @@ public class PublicSearchResultsPage extends PageTemplate {
 		String title  = params.get("title").toString();
 		String author = params.get("author").toString();
 		
-		add(new Label("title").setDefaultModel(Model.of(title)));
-		add(new Label("author").setDefaultModel(Model.of(author)));
-
-		
-		
-		List<BookInfo> books = BookInfo.searchBooks(title, author, 12);
-		add(new Label("numItems").setDefaultModel(Model.of(books.size())));
+		List<BookInfo> books = BookInfo.searchBooks(title, author, 10);
 		if (books.isEmpty()){
 			add(new WebMarkupContainer("books").setVisible(false));
+		}else{
+			add(new ListView<BookInfo>("books", books){
+				private static final long serialVersionUID = -8791724204152958230L;
+				@Override
+				protected void populateItem(ListItem<BookInfo> item) {
+					//add labels backed by property models on item.
+					item.add(new Label("title", new PropertyModel(item.getModel(), "title")));
+					item.add(new Label("publisher", new PropertyModel(item.getModel(), "publisher")));
+					item.add(new Label("authors", new PropertyModel(item.getModel(), "authors")));
+					item.add(new Label("description", new PropertyModel(item.getModel(), "description")));
+
+					//Add image
+					WebMarkupContainer img = new WebMarkupContainer("img");
+					img.add(AttributeModifier.replace("src", 
+							new PropertyModel(item.getModel(), "thumbnailURL")));
+					item.add(img);
+					//Add Book button
+					final String isbn = item.getModelObject().getIsbn();
+
+					Form addBook = new Form("actions"){
+						private static final long serialVersionUID = 3856147858330663528L;
+						@Override
+						protected void onSubmit(){
+							super.onSubmit();
+							setResponsePage(HomePage.class);
+							//Create and persist book.
+							UserWebSession session = (UserWebSession)Session.get();
+							Book.createBook(isbn, session.getUser().getUidnumber());
+						}
+					};
+					item.add(addBook);
+				}
+
+				@Override
+				public boolean isVisible(){
+					return !getList().isEmpty();
+				}
+			});
 		}
-		add(new ListView<BookInfo>("books", books){
-			private static final long serialVersionUID = -8791724204152958230L;
-			@Override
-			protected void populateItem(ListItem<BookInfo> item) {
-				//add labels backed by property models on item.
-				item.add(new Label("title", new PropertyModel(item.getModel(), "title")));
-				item.add(new Label("publisher", new PropertyModel(item.getModel(), "publisher")));
-				item.add(new Label("authors", new PropertyModel(item.getModel(), "authors")));
-				item.add(new Label("description", new PropertyModel(item.getModel(), "description")));
-				
-				//Add image
-				WebMarkupContainer img = new WebMarkupContainer("img");
-				img.add(AttributeModifier.replace("src", 
-						new PropertyModel(item.getModel(), "thumbnailURL")));
-				item.add(img);
-				//Add Book button
-				final String isbn = item.getModelObject().getIsbn();
-				
-				Form addBook = new Form("actions"){
-					private static final long serialVersionUID = 3856147858330663528L;
-					@Override
-					protected void onSubmit(){
-						super.onSubmit();
-						setResponsePage(HomePage.class);
-						//Create and persist book.
-						UserWebSession session = (UserWebSession)Session.get();
-						Book.createBook(isbn, session.getUser().getUidnumber());
-					}
-				};
-				item.add(addBook);
-			}
-			
-			@Override
-			public boolean isVisible(){
-				return !getList().isEmpty();
-			}
-		});
 	}
 
 }
