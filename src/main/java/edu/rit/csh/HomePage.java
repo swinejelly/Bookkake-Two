@@ -28,6 +28,11 @@ public class HomePage extends PageTemplate {
 	private WebMarkupContainer action;
 	
 	/**
+	 * The Title for action
+	 */
+	private Label actionTitle;
+	
+	/**
 	 * The link to add a book.
 	 */
 	private AjaxLink addBookLink;
@@ -41,6 +46,10 @@ public class HomePage extends PageTemplate {
 		super();
 		action = new WebMarkupContainer("action");
 		action.setOutputMarkupId(true);
+		
+		actionTitle = new Label("actionTitle", "Action");
+		actionTitle.setOutputMarkupId(true);
+		add(actionTitle);
 		addBookLink = new AjaxLink("addBookLink"){
 			private static final long serialVersionUID = 2908147205998969131L;
 
@@ -53,7 +62,14 @@ public class HomePage extends PageTemplate {
 				action.replaceWith(actionPanel);
 				//Communicate change to client
 				target.add(actionPanel);
+				//replace actionTitle
+				Label l = new Label("actionTitle", "Add Book");
+				l.setOutputMarkupId(true);
+				actionTitle.replaceWith(l);
+				target.add(l);
+				
 				action = actionPanel;
+				actionTitle = l;
 			}
 			
 		};
@@ -70,7 +86,13 @@ public class HomePage extends PageTemplate {
 				action.replaceWith(actionPanel);
 				//return panel to client.
 				target.add(actionPanel);
+				Label l = new Label("actionTitle", "Borrow Book");
+				l.setOutputMarkupId(true);
+				actionTitle.replaceWith(l);
+				target.add(l);
+				
 				action = actionPanel;
+				actionTitle = l;
 			}
 		};
 		
