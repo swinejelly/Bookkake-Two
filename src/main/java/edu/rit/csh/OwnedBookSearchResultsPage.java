@@ -63,6 +63,14 @@ public class OwnedBookSearchResultsPage extends PageTemplate {
 				System.out.println(user.getGivenname());
 			}
 		}
+		final LDAPUser user = ((UserWebSession)this.getSession()).getUser();
+		
+		//Remove all books owned or possessed by the user.
+		List<Book> ownedBooks = Book.getOwnedBooks(user.getUidnumber());
+		List<Book> possessedBooks = Book.getPossessedBooks(user.getUidnumber());
+		
+		activeBooks.removeAll(ownedBooks);
+		activeBooks.removeAll(possessedBooks);
 		
 		add(new ListView<Book>("book", activeBooks) {
 			private static final long serialVersionUID = 1047917720579988798L;
