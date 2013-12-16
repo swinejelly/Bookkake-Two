@@ -222,6 +222,21 @@ public class Book implements Serializable{
 		sess.close();
 	}
 	
+	public void give(String newOwner){
+		//this is a gigantic waste of a session but I'm too lazy to program
+		//it properly
+		removeBorrow();
+		
+		Session sess = sessFact.openSession();
+		sess.beginTransaction();
+		sess.update(this);
+		ownerUID = newOwner;
+		sess.save(this);
+		sess.getTransaction().commit();
+		sess.close();
+		
+	}
+	
 	@Id
 	@GeneratedValue(generator="increment")
 	@GenericGenerator(name="increment", strategy="increment")

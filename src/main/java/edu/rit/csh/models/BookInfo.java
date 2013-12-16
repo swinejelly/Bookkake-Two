@@ -41,7 +41,7 @@ public class BookInfo implements Serializable{
 	
 	private BookInfo(){}
 	
-	public BookInfo(JSONObject obj){
+	public BookInfo(String retrievalIsbn, JSONObject obj){
 		title = obj.optString("title");
 		publisher = obj.optString("publisher");
 		description = obj.optString("description");
@@ -62,16 +62,20 @@ public class BookInfo implements Serializable{
 		}
 		authors = sb.toString();
 		
-		//get isbn
-		JSONArray isbns = obj.optJSONArray("industryIdentifiers");
-		if (isbns != null){
-			for (int i = 0; i < isbns.length(); i++){
-				JSONObject isbnObj = isbns.getJSONObject(i);
-				if ("ISBN_13".equals(isbnObj.getString("type"))){
-					isbn = isbnObj.getString("identifier");
-					break;
+		if (retrievalIsbn == null){
+			//get isbn
+			JSONArray isbns = obj.optJSONArray("industryIdentifiers");
+			if (isbns != null){
+				for (int i = 0; i < isbns.length(); i++){
+					JSONObject isbnObj = isbns.getJSONObject(i);
+					if ("ISBN_13".equals(isbnObj.getString("type"))){
+						isbn = isbnObj.getString("identifier");
+						break;
+					}
 				}
 			}
+		}else{
+			isbn = retrievalIsbn;
 		}
 	}
 	
@@ -99,7 +103,7 @@ public class BookInfo implements Serializable{
 					if (bookJSON != null){
 						JSONObject volumeInfo = bookJSON.getJSONObject("volumeInfo");
 						if (volumeInfo != null){
-							info = new BookInfo(volumeInfo);
+							info = new BookInfo(isbn, volumeInfo);
 						}
 					}
 				}
@@ -140,7 +144,7 @@ public class BookInfo implements Serializable{
 				cap = Math.min(cap, bookObjects.length());
 				for (int i = 0; i < cap; i++){
 					JSONObject bookJSON = bookObjects.getJSONObject(i).getJSONObject("volumeInfo");
-					BookInfo info = new BookInfo(bookJSON);
+					BookInfo info = new BookInfo(null, bookJSON);
 					if (!info.isbn.isEmpty()){
 						books.add(info);
 					}else{

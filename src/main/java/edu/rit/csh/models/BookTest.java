@@ -38,6 +38,8 @@ public class BookTest {
 		qry.executeUpdate();
 		Query qry2 = sess.createQuery("delete from BorrowPeriod");
 		qry2.executeUpdate();
+		Query qry3 = sess.createQuery("delete from BookInfo");
+		qry3.executeUpdate();
 		sess.getTransaction().commit();
 		sess.close();
 	}
@@ -63,8 +65,8 @@ public class BookTest {
 	@Test 
 	public void testGetPossessedBooks(){
 		Book.createBook("9780857081087", "5678");
-		Book.createBook("9781439516881", "1234");
-		Book.createBook("9781439516881", "5678");
+		Book.createBook("143951688X", "1234");
+		Book.createBook("143951688X", "5678");
 		Book.createBook("9780142409848", "4321");
 		
 		
@@ -100,8 +102,8 @@ public class BookTest {
 	@Test
 	public void testGetOwnedBooks(){
 		Book.createBook("9780857081087", "5678");
-		Book.createBook("9781439516881", "1234");
-		Book.createBook("9781439516881", "5678");
+		Book.createBook("143951688X", "1234");
+		Book.createBook("143951688X", "5678");
 		Book.createBook("9780142409848", "4321");
 		
 		List<Book> results1234 = Book.getOwnedBooks("1234");
@@ -125,7 +127,7 @@ public class BookTest {
 	 */
 	@Test
 	public void testGetOwnedBooksDeleted(){
-		Book.createBook("9781439516881", "1234");
+		Book.createBook("143951688X", "1234");
 		Book.createBook("9780142409848", "1234").delete();
 		Book.createBook("9780857081087", "1234");
 		
@@ -139,7 +141,7 @@ public class BookTest {
 	@Test
 	public void testDelete(){
 		//create book
-		String isbn = "9781439516881";
+		String isbn = "143951688X";
 		Book.createBook(isbn, "1234");
 		//get book and "delete" it
 		Book deleteBook = Book.getBook(isbn, "1234");
@@ -154,7 +156,7 @@ public class BookTest {
 	 */
 	@Test
 	public void testGet(){
-		String isbn = "9781439516881";
+		String isbn = "143951688X";
 		String ownerUID = "1234";
 		Book b = Book.createBook(isbn, ownerUID);
 		
@@ -169,7 +171,7 @@ public class BookTest {
 	 */
 	@Test
 	public void testGetBooksByIsbn(){
-		String isbns[] = {"9781439516881", "9780857081087", "9780857081087"};
+		String isbns[] = {"143951688X", "9780857081087", "9780857081087"};
 		String uids[]  = {"1234",          "5678",          "1234"};
 		for (int i = 0; i < isbns.length; i++){
 			Book.createBook(isbns[i], uids[i]);
@@ -178,7 +180,7 @@ public class BookTest {
 		List<Book> books0486 = Book.getBooksByIsbn("9780857081087");
 		assertEquals(2, books0486.size());
 		
-		List<Book> books9780 = Book.getBooksByIsbn("9781439516881");
+		List<Book> books9780 = Book.getBooksByIsbn("143951688X");
 		assertEquals(1, books9780.size());
 		
 		List<Book> noBooks = Book.getBooksByIsbn("1604598913");
@@ -188,7 +190,7 @@ public class BookTest {
 	
 	@Test
 	public void testBorrow(){
-		String isbn = "9781439516881";
+		String isbn = "143951688X";
 		String ownerUID = "1234";
 		Book b = Book.createBook(isbn, ownerUID);
 		b.delete();
@@ -211,8 +213,33 @@ public class BookTest {
 	}
 	
 	@Test
+	public void testGive(){
+		String isbn = "143951688X";
+		String ownerUID = "1234";
+		Book b = Book.createBook(isbn, ownerUID);
+		
+		b.give("4567");
+		
+		Book bRetrieved = Book.getBooksByIsbn(isbn).get(0);
+		assertEquals("4567", bRetrieved.getOwnerUID());
+		
+		Calendar today = Calendar.getInstance();
+		
+		Calendar future = Calendar.getInstance();
+		future.add(Calendar.DATE, 5);
+		
+		bRetrieved.borrow("9876", today, future);
+		
+		bRetrieved.give("1111");
+		
+		Book bRetrieved2 = Book.getBooksByIsbn(isbn).get(0);
+		
+		assertNull(bRetrieved2.getBorrowPeriod());
+	}
+	
+	@Test
 	public void testBookInfoAssoc(){
-		String isbn = "9781439516881";
+		String isbn = "143951688X";
 		String owner1 = "1234";
 		String owner2 = "5678";
 		Book b1 = Book.createBook(isbn, owner1);
