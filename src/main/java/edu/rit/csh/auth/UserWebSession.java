@@ -34,7 +34,7 @@ public class UserWebSession extends WebSession {
 			}else{
 				System.out.printf("User %s could not be found\n", uid);
 			}
-		} catch (LdapException | IOException | CursorException e) {
+		} catch (LdapException | CursorException e) {
 			e.printStackTrace();
 		}
 	}

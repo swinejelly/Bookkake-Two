@@ -94,6 +94,5 @@ public class SearchOwnedBookForm extends Form {
 			}
 			return suggestions.iterator();
 		}
-		
 	}
 }

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.directory.api.ldap.model.cursor.CursorException;
+import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -139,6 +141,29 @@ public class HomePage extends PageTemplate {
 						}
 				});
 				
+				AjaxFallbackLink<Book> giveLink = new AjaxFallbackLink<Book>("give"){
+					private static final long serialVersionUID = 7307145740090680691L;
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						GiveBookPanel givePanel = null;
+						try{
+							givePanel = new GiveBookPanel("action", getModelObject());
+						}catch (LdapException | CursorException e){
+							e.printStackTrace();
+							return;
+						}
+						givePanel.setOutputMarkupId(true);
+						Label giveLabel = new Label("actionTitle", "Give Book");
+						giveLabel.setOutputMarkupId(true);
+						
+						action.replaceWith(givePanel);
+						actionTitle.replaceWith(giveLabel);
+						
+						target.add(givePanel, giveLabel);
+					}
+				};
+				giveLink.setModel(item.getModel());
+				item.add(giveLink);
 			}
 		};
 		ownedPossessedBooksView.setOutputMarkupId(true);

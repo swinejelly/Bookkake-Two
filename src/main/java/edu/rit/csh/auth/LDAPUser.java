@@ -15,6 +15,8 @@ public class LDAPUser implements Serializable{
 	private String uid;
 	/**First/nickname*/
 	private String givenname;
+	/**Full name*/
+	private String commonname;
 	/**Whether a member is on floor*/
 	private boolean onfloor;
 	/**Whether a member is active*/
@@ -24,10 +26,11 @@ public class LDAPUser implements Serializable{
 	/**Current room number*/
 	private String roomnumber;
 	
-	public LDAPUser(String uid, String givenname, boolean onfloor,
+	public LDAPUser(String uid, String givenname, String commonname, boolean onfloor,
 			boolean active, String uidnumber, String roomnmber) {
 		this.uid = uid;
 		this.givenname = givenname;
+		this.commonname = commonname;
 		this.onfloor = onfloor;
 		this.active = active;
 		this.uidnumber = uidnumber;
@@ -48,6 +51,14 @@ public class LDAPUser implements Serializable{
 
 	public void setGivenname(String givenname) {
 		this.givenname = givenname;
+	}
+
+	public String getCommonname() {
+		return commonname;
+	}
+
+	public void setCommonname(String commonname) {
+		this.commonname = commonname;
 	}
 
 	public boolean isOnfloor() {

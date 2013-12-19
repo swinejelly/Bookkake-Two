@@ -292,7 +292,7 @@ public class Book implements Serializable{
 	public LDAPUser getOwner(){
 		try {
 			return WicketApplication.getWicketApplication().getLDAPProxy().getUser(ownerUID);
-		} catch (LdapException | IOException | CursorException e) {
+		} catch (LdapException | CursorException e) {
 			return null;
 		}
 	}
@@ -320,7 +320,7 @@ public class Book implements Serializable{
 			}else{
 				return getOwner();
 			}
-		} catch (LdapException | IOException | CursorException e) {
+		} catch (LdapException | CursorException e) {
 			return null;
 		}
 	}

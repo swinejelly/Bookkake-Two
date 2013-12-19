@@ -65,7 +65,7 @@ public class WicketApplication extends WebApplication
 		try {
 			dummyUser = getLDAPProxy().getUser("10412");
 			sess.setUser(dummyUser);
-		} catch (LdapException | IOException | CursorException e) {
+		} catch (LdapException | CursorException e) {
 			e.printStackTrace();
 		}
 		return sess;

@@ -60,9 +60,21 @@ public class LDAPProxy {
 	 * @throws LdapException 
 	 * @throws CursorException 
 	 */
-	public LDAPUser getUser(String uid) throws LdapException, IOException, CursorException{
+	public LDAPUser getUser(String uid) throws LdapException, CursorException{
 		if (connect()){
 			EntryCursor cursor = connection.search("ou=Users,dc=csh,dc=rit,dc=edu", "(uidnumber="+uid+")", SearchScope.SUBTREE);
+			if (cursor.next()){
+				Entry entry = cursor.get();
+				return constructFromEntry(entry);
+			}
+			return null;
+		}
+		return null;
+	}
+	
+	public LDAPUser getUserByUsername(String uid) throws LdapException, CursorException{
+		if (connect()){
+			EntryCursor cursor = connection.search("ou=Users,dc=csh,dc=rit,dc=edu", "(uid="+uid+")", SearchScope.SUBTREE);
 			if (cursor.next()){
 				Entry entry = cursor.get();
 				return constructFromEntry(entry);
@@ -125,8 +137,9 @@ public class LDAPProxy {
 			}
 			boolean onfloor = values.get("onfloor").equals("1");
 			boolean active = values.get("active").equals("1");
-			LDAPUser user = new LDAPUser(	values.get("uid"),
+			LDAPUser user = new LDAPUser(values.get("uid"),
 					values.get("givenname"),
+					values.get("cn"),
 					onfloor,
 					active,
 					values.get("uidnumber"),

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+	<head>
+	</head>
+	<body>
+		<wicket:panel>
+			<form wicket:id="giveBookForm" id="giveBookForm" method="post"
+			   class="ui form">
+				<label>Enter recipient's name or username.</label>
+				<input type="text" name="username" wicket:id="username">
+				<br>
+				<br>
+				<input type="submit" name="giveBook" value="Give Book!" wicket:id="giveBookSubmit"
+				  class="ui blue submit button">
+			</form>
+		</wicket:panel>
+	</body>
+</html>
