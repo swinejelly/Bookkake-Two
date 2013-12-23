@@ -1,4 +1,4 @@
-package edu.rit.csh;
+package edu.rit.csh.components;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -15,9 +15,11 @@ import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.CompoundPropertyModel;
 
+import edu.rit.csh.WicketApplication;
 import edu.rit.csh.auth.LDAPProxy;
 import edu.rit.csh.auth.LDAPUser;
 import edu.rit.csh.models.Book;
+import edu.rit.csh.pages.HomePage;
 
 public class GiveBookForm extends Form<Book> {
 	private static final long serialVersionUID = 474413093694451263L;

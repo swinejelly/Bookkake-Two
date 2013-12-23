@@ -1,4 +1,4 @@
-package edu.rit.csh;
+package edu.rit.csh.components;
 
 import org.apache.wicket.markup.html.panel.Panel;
 

@@ -1,6 +1,9 @@
 package edu.rit.csh;
 
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Properties;
 
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.exception.LdapException;
@@ -17,9 +20,11 @@ import org.hibernate.cfg.Configuration;
 import edu.rit.csh.auth.LDAPProxy;
 import edu.rit.csh.auth.LDAPUser;
 import edu.rit.csh.auth.UserWebSession;
+import edu.rit.csh.googlebooks.GoogleBookAPIQuery;
 import edu.rit.csh.models.Book;
 import edu.rit.csh.models.BookInfo;
 import edu.rit.csh.models.BorrowPeriod;
+import edu.rit.csh.pages.HomePage;
 
 /**
  * Application object for your web application. If you want to run this application without deploying, run the Start class.
@@ -31,6 +36,7 @@ public class WicketApplication extends WebApplication
 	
 	private SessionFactory sessionFactory;
 	private LDAPProxy ldapProxy;
+	private GoogleBookAPIQuery googleBooksQuery;
 	
 	/**
 	 * @see org.apache.wicket.Application#getHomePage()
@@ -93,5 +99,25 @@ public class WicketApplication extends WebApplication
 			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	public GoogleBookAPIQuery authGoogleBooksQuery(){
+		if (googleBooksQuery == null){
+			try (BufferedInputStream stream = new BufferedInputStream(
+					new FileInputStream("googlebooks.properties"))){ 
+					
+			Properties props = new Properties();
+			props.load(stream);
+			stream.close();
+			googleBooksQuery = new GoogleBookAPIQuery();
+			googleBooksQuery.setAPIKey(props.getProperty("key"));
+			} catch (IOException e){
+				e.printStackTrace();
+				return null;
+			}
+		}
+		googleBooksQuery.setAuthor("");
+		googleBooksQuery.setTitle("");
+		return googleBooksQuery;
 	}
 }

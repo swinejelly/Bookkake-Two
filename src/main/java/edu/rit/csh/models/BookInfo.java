@@ -127,7 +127,8 @@ public class BookInfo implements Serializable{
 		//
 		List<BookInfo> books = new ArrayList<BookInfo>();
 		
-		GoogleBookAPIQuery qry = new GoogleBookAPIQuery();
+		GoogleBookAPIQuery qry = WicketApplication.getWicketApplication()
+				.authGoogleBooksQuery();
 		qry.setTitle(title);
 		if (author != null && !author.isEmpty()){
 			qry.setAuthor(author);

@@ -1,4 +1,4 @@
-package edu.rit.csh;
+package edu.rit.csh.components;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -15,6 +15,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import edu.rit.csh.models.BookInfo;
+import edu.rit.csh.pages.OwnedBookSearchResultsPage;
 
 public class SearchOwnedBookForm extends Form {
 	private static final long serialVersionUID = -3461822475517395754L;

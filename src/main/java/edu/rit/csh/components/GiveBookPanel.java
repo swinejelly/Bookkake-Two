@@ -1,4 +1,4 @@
-package edu.rit.csh;
+package edu.rit.csh.components;
 
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.exception.LdapException;

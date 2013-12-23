@@ -1,4 +1,4 @@
-package edu.rit.csh;
+package edu.rit.csh.components;
 
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
@@ -7,6 +7,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.PropertyModel;
 
 import edu.rit.csh.auth.UserWebSession;
+import edu.rit.csh.pages.HomePage;
 
 public class Header extends Panel {
 	private static final long serialVersionUID = -1301661843720137382L;

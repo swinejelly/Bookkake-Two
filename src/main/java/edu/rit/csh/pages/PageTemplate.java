@@ -1,7 +1,10 @@
-package edu.rit.csh;
+package edu.rit.csh.pages;
 
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.markup.html.WebPage;
+
+import edu.rit.csh.components.Footer;
+import edu.rit.csh.components.Header;
 
 public class PageTemplate extends WebPage {
 	private static final long serialVersionUID = -6071606580892913447L;

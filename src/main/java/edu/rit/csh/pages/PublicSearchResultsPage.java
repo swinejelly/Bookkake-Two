@@ -1,4 +1,4 @@
-package edu.rit.csh;
+package edu.rit.csh.pages;
 
 import java.util.List;
 

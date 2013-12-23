@@ -1,4 +1,4 @@
-package edu.rit.csh;
+package edu.rit.csh.pages;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -16,6 +16,9 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.PropertyModel;
 
 import edu.rit.csh.auth.UserWebSession;
+import edu.rit.csh.components.GiveBookPanel;
+import edu.rit.csh.components.SearchBookPanel;
+import edu.rit.csh.components.SearchOwnedBookPanel;
 import edu.rit.csh.models.Book;
 import edu.rit.csh.models.BookInfo;
 

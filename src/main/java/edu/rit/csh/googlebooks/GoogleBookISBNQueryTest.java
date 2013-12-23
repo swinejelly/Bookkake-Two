@@ -37,8 +37,6 @@ public class GoogleBookISBNQueryTest {
 	@Test
 	public void test() {
 		GoogleBookISBNQuery qry = new GoogleBookISBNQuery("9780486295060");
-		assertEquals(qry.toString(), "https://www.googleapis.com/books/v1/volumes?q=isbn:9780486295060");
-		
-		qry = new GoogleBookISBNQuery("978048629506X");
+		assertEquals("https://www.googleapis.com/books/v1/volumes?q=isbn:9780486295060", qry.getRequest());
 	}
 }
