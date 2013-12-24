@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+	<head>
+	</head>
+	<body>
+		<wicket:panel>
+			<form wicket:id="uploadBookFileForm" id="uploadBookFileForm" method="post"
+			   class="ui form">
+				<h3><label>Attach book file.</label></h3>
+				<input type="file" name="file" wicket:id="file">
+				<br>
+				<br>
+				<input type="submit" name="uploadFile" value="Upload Book!" wicket:id="uploadFileSubmit"
+				  class="ui blue submit button">
+			</form>
+		</wicket:panel>
+	</body>
+</html>

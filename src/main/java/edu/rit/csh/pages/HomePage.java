@@ -1,5 +1,6 @@
 package edu.rit.csh.pages;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,14 +12,17 @@ import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.DownloadLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.PropertyModel;
+import org.joda.time.field.DividedDateTimeField;
 
 import edu.rit.csh.auth.UserWebSession;
 import edu.rit.csh.components.GiveBookPanel;
 import edu.rit.csh.components.SearchBookPanel;
 import edu.rit.csh.components.SearchOwnedBookPanel;
+import edu.rit.csh.components.UploadBookFilePanel;
 import edu.rit.csh.models.Book;
 import edu.rit.csh.models.BookInfo;
 
@@ -133,16 +137,16 @@ public class HomePage extends PageTemplate {
 				item.add(new Label("title", new PropertyModel(item.getModel(), "bookInfo.title")));
 				
 				//Add link to delete book
-				final String isbn13 = ((Book)item.getModelObject()).getIsbn();
-				final String ownerUID = ((Book)item.getModelObject()).getOwnerUID();
-				item.add(new AjaxFallbackLink("delete"){
+				AjaxFallbackLink<Book> deleteLink = new AjaxFallbackLink<Book>("delete"){
 					private static final long serialVersionUID = 589193295987221975L;
-						@Override
-						public void onClick(AjaxRequestTarget target) {
-							Book.getBook(isbn13, ownerUID).delete();
-							setResponsePage(HomePage.class);
-						}
-				});
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						getModelObject().delete();
+						setResponsePage(HomePage.class);
+					}
+				}; 
+				deleteLink.setModel(item.getModel());
+				item.add(deleteLink);
 				
 				AjaxFallbackLink<Book> giveLink = new AjaxFallbackLink<Book>("give"){
 					private static final long serialVersionUID = 7307145740090680691L;
@@ -162,11 +166,58 @@ public class HomePage extends PageTemplate {
 						action.replaceWith(givePanel);
 						actionTitle.replaceWith(giveLabel);
 						
+						action = givePanel;
+						actionTitle = giveLabel;
+						
 						target.add(givePanel, giveLabel);
 					}
 				};
 				giveLink.setModel(item.getModel());
 				item.add(giveLink);
+				
+				//Components for file upload status.
+				if (!item.getModelObject().isUploaded() && item.getModelObject().getRelPath() == null){
+					//Item has no file.
+					AjaxFallbackLink<Book> uploadLink = new AjaxFallbackLink<Book>("fileButton") {
+						private static final long serialVersionUID = 5004785066659183906L;
+
+						@Override
+						public void onClick(AjaxRequestTarget target) {
+							UploadBookFilePanel uploadPanel = new UploadBookFilePanel("action", getModelObject());
+							uploadPanel.setOutputMarkupId(true);
+							String labelStr = "Upload \"" + getModelObject().getBookInfo().getTitle() +	"\"";
+							Label uploadLabel = new Label("actionTitle", labelStr);
+							uploadLabel.setOutputMarkupId(true);
+
+							action.replaceWith(uploadPanel);
+							actionTitle.replaceWith(uploadLabel);
+
+							action = uploadPanel;
+							actionTitle = uploadLabel;
+
+							target.add(action, actionTitle);
+						}
+					};
+					uploadLink.setModel(item.getModel());
+					Label label = new Label("fileMessage", "Add File");
+					uploadLink.add(label);
+					item.add(uploadLink);
+				}else if (!item.getModelObject().isUploaded()){
+					//Item's file is currently uploading.
+					WebMarkupContainer uploadingButton = new WebMarkupContainer("fileButton");
+					Label label = new Label("fileMessage", "Uploading");
+					uploadingButton.add(label);
+					item.add(uploadingButton);
+				}else{
+					//Item's file is uploaded.
+					File f = item.getModelObject().getFile();
+					String clientName = f.getPath().substring(36);
+					DownloadLink downloadingButton = 
+							new DownloadLink("fileButton", f, clientName);
+					Label label = new Label("fileMessage", "Download");
+					downloadingButton.add(label);
+					item.add(downloadingButton);
+				}
 			}
 		};
 		ownedPossessedBooksView.setOutputMarkupId(true);
@@ -181,20 +232,19 @@ public class HomePage extends PageTemplate {
 				//add title
 				item.add(new Label("title", new PropertyModel(item.getModel(), "bookInfo.title")));
 				
-				final String isbn13 = ((Book)item.getModelObject()).getIsbn();
-				final String ownerUID = ((Book)item.getModelObject()).getOwnerUID();
 				//Add link to return book to other user.
-				item.add(new AjaxFallbackLink("return"){
+				AjaxFallbackLink<Book> returnLink = new AjaxFallbackLink<Book>("return"){
 					private static final long serialVersionUID = -7032759365273183041L;
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						Book.getBook(isbn13, ownerUID).removeBorrow();
+						getModelObject().removeBorrow();
 						setResponsePage(HomePage.class);
 					}
-					
-				});
-				
+				};
+				returnLink.setModel(item.getModel());
+ 
+				item.add(returnLink);			
 			}
 		};
 		borrowedBooksView.setOutputMarkupId(true);
@@ -209,19 +259,18 @@ public class HomePage extends PageTemplate {
 						//add title
 						item.add(new Label("title", new PropertyModel(item.getModel(), "bookInfo.title")));
 						
-						final String isbn13 = ((Book)item.getModelObject()).getIsbn();
-						final String ownerUID = ((Book)item.getModelObject()).getOwnerUID();
-						//Add link to return book to other user.
-						item.add(new AjaxFallbackLink("return"){
+						AjaxFallbackLink<Book> returnLink = new AjaxFallbackLink<Book>("return"){
 							private static final long serialVersionUID = -7032759365273183041L;
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
-								Book.getBook(isbn13, ownerUID).removeBorrow();
+								getModelObject().removeBorrow();
 								setResponsePage(HomePage.class);
 							}
-							
-						});
+						};
+						returnLink.setModel(item.getModel());
+		 
+						item.add(returnLink);		
 						
 					}
 				};

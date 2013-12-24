@@ -1,11 +1,17 @@
 package edu.rit.csh.models;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -18,6 +24,7 @@ import javax.persistence.Transient;
 
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.exception.LdapException;
+import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -37,6 +44,16 @@ public class Book implements Serializable{
 	public static void setSessFact(SessionFactory fact){
 		sessFact = fact;
 	}
+	
+	private static String filePath = "";
+
+	public static String getFilePath() {
+		return filePath;
+	}
+
+	public static void setFilePath(String filePath) {
+		Book.filePath = filePath;
+	}
 
 	private Long id;
 	
@@ -49,6 +66,10 @@ public class Book implements Serializable{
 	private BookInfo bookInfo;
 
 	private boolean active = true;
+	
+	private String relPath;
+	
+	private boolean isUploaded = false;
 	
 	public Book(){
 		
@@ -234,6 +255,60 @@ public class Book implements Serializable{
 		sess.save(this);
 		sess.getTransaction().commit();
 		sess.close();
+	}
+	
+	/**
+	 * Uploads the file in upload. The storage takes place in the background, but isUploaded
+	 * will be set to false until the file has finished uploading, at which point it will be
+	 * set to true.
+	 */
+	public void upload(final String fileName, final byte[] bytes){
+		final File destination;
+		if (relPath != null){
+			getFile().delete();
+		}
+		
+		String destStr = UUID.randomUUID().toString() + fileName;
+		destination = new File(destStr);
+		Session sess = sessFact.openSession();
+		sess.beginTransaction();
+		sess.update(this);
+		relPath = destStr;
+		sess.save(this);
+		sess.getTransaction().commit();
+		sess.close();
+		
+		Runnable uploadTask = new Runnable(){
+			@Override
+			public void run() {
+				try (
+						OutputStream out = new BufferedOutputStream(
+											new FileOutputStream(destination), 65536);
+					){
+					out.write(bytes);
+				} catch (IOException e) {
+					e.printStackTrace();
+					destination.delete();
+					Session sess = sessFact.openSession();
+					sess.beginTransaction();
+					sess.update(Book.this);
+					relPath = null;
+					sess.save(Book.this);
+					sess.getTransaction().commit();
+					sess.close();
+					return;
+				}
+				Session sess = sessFact.openSession();
+				sess.beginTransaction();
+				sess.update(Book.this);
+				isUploaded = true;
+				sess.save(Book.this);
+				sess.getTransaction().commit();
+				sess.close();
+			}
+		};
+		
+		WicketApplication.getWicketApplication().getThreadExecutor().execute(uploadTask);
 		
 	}
 	
@@ -333,6 +408,40 @@ public class Book implements Serializable{
 		this.active = active;
 	}
 	
+	public String getRelPath() {
+		return relPath;
+	}
+
+	public void setRelPath(String relPath) {
+		this.relPath = relPath;
+	}
+	
+	public boolean isUploaded() {
+		return isUploaded;
+	}
+
+	public void setUploaded(boolean isUploaded) {
+		this.isUploaded = isUploaded;
+	}
+
+	/**
+	 * @return a file handle for this book's file if it has one
+	 * and no errors occur, otherwise null.
+	 */
+	@Transient
+	public File getFile(){
+		if (relPath == null){
+			return null;
+		}else{
+			String path = filePath + relPath;
+			File f = new File(path);
+			if (f.isFile() && f.canRead() && f.canWrite()){
+				return f;
+			}
+		}
+		return null;
+	}
+
 	@Override
 	public boolean equals(Object o){
 		if (o instanceof Book){

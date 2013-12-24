@@ -4,6 +4,9 @@ import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.exception.LdapException;
@@ -36,7 +39,8 @@ public class WicketApplication extends WebApplication
 	
 	private SessionFactory sessionFactory;
 	private LDAPProxy ldapProxy;
-	private GoogleBookAPIQuery googleBooksQuery;
+	private String googleBooksApiKey;
+	private ThreadPoolExecutor threadExecutor;
 	
 	/**
 	 * @see org.apache.wicket.Application#getHomePage()
@@ -58,6 +62,30 @@ public class WicketApplication extends WebApplication
 		Book.setSessFact(sessionFactory);
 		BookInfo.setSessFact(sessionFactory);
 		BorrowPeriod.setSessFact(sessionFactory);
+		
+		//Init ldapProxy
+		try {
+			ldapProxy = new LDAPProxy("ldap.properties");
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+		
+		//Init googleBooksAPIkey
+		try (BufferedInputStream stream = new BufferedInputStream(
+				new FileInputStream("googlebooks.properties"))){ 
+		Properties props = new Properties();
+		props.load(stream);
+		stream.close();
+		googleBooksApiKey = props.getProperty("key");
+		} catch (IOException e){
+			e.printStackTrace();
+			System.exit(1);
+		}
+		
+		//init threadExecutor
+		threadExecutor = new ThreadPoolExecutor(2, 8, 
+				30, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(8));
 		
 		PackageResourceReference bgRef = 
 				new PackageResourceReference(getClass(), "background.jpg");
@@ -90,34 +118,16 @@ public class WicketApplication extends WebApplication
 	}
 	
 	public LDAPProxy getLDAPProxy(){
-		try {
-			if (ldapProxy == null){
-				ldapProxy = new LDAPProxy("ldap.properties");
-			}
-			return ldapProxy;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
+		return ldapProxy;
 	}
 	
 	public GoogleBookAPIQuery authGoogleBooksQuery(){
-		if (googleBooksQuery == null){
-			try (BufferedInputStream stream = new BufferedInputStream(
-					new FileInputStream("googlebooks.properties"))){ 
-					
-			Properties props = new Properties();
-			props.load(stream);
-			stream.close();
-			googleBooksQuery = new GoogleBookAPIQuery();
-			googleBooksQuery.setAPIKey(props.getProperty("key"));
-			} catch (IOException e){
-				e.printStackTrace();
-				return null;
-			}
-		}
-		googleBooksQuery.setAuthor("");
-		googleBooksQuery.setTitle("");
-		return googleBooksQuery;
+		GoogleBookAPIQuery qry = new GoogleBookAPIQuery();
+		qry.setAPIKey(googleBooksApiKey);
+		return qry;
+	}
+	
+	public ThreadPoolExecutor getThreadExecutor(){
+		return threadExecutor;
 	}
 }

@@ -33,6 +33,10 @@
 								<td>
 									<a class="mini red ui button" wicket:id="delete">Delete</a>
 									<a class="mini blue ui button" wicket:id="give">Give</a>
+									<!-- Only one of the three below should show up -->
+									<a class="mini white ui button" wicket:id="fileButton">
+										<div wicket:id="fileMessage"></div>
+									</a>
 								</td>
 							</tr>
 							<tr wicket:id="borrowedBooks">
