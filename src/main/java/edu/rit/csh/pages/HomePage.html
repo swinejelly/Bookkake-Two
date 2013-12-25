@@ -33,10 +33,9 @@
 								<td>
 									<a class="mini red ui button" wicket:id="delete">Delete</a>
 									<a class="mini blue ui button" wicket:id="give">Give</a>
-									<!-- Only one of the three below should show up -->
-									<a class="mini white ui button" wicket:id="fileButton">
-										<div wicket:id="fileMessage"></div>
-									</a>
+									<a class="mini white ui button" wicket:id="upload">Upload</a>
+									<a class="mini white ui button" wicket:id="uploading">Uploading</a>
+									<a class="mini white ui button" wicket:id="download">Download</a>
 								</td>
 							</tr>
 							<tr wicket:id="borrowedBooks">
@@ -55,7 +54,7 @@
 							</tr>
 						</table>		    
 						<a wicket:id="addBookLink" class="ui green button">Add Book</a>
-						<a wicket:id="searchBookLink" class="ui orange button">Borrow Book</a>
+						<a wicket:id="searchBookLink" class="ui orange button">Borrow/Download Book</a>
 				    </div>
 			    </div>
 			    <div class="five wide column">

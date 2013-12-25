@@ -25,6 +25,7 @@ import javax.persistence.Transient;
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
+import org.apache.wicket.markup.html.link.DownloadLink;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -440,6 +441,21 @@ public class Book implements Serializable{
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * @return a downloadlink for this book's file if it has one
+	 * and it can successfully get the file handle, else null.
+	 */
+	@Transient
+	public DownloadLink makeDownloadLink(String title){
+		File f = getFile();
+		if (f != null){
+			String clientName = relPath.substring(36);
+			return new DownloadLink(title, f, clientName);
+		}else{
+			return null;
+		}
 	}
 
 	@Override

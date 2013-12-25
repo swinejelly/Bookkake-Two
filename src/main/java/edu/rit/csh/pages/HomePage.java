@@ -10,6 +10,7 @@ import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.DownloadLink;
@@ -175,10 +176,17 @@ public class HomePage extends PageTemplate {
 				giveLink.setModel(item.getModel());
 				item.add(giveLink);
 				
+				WebComponent ivUpload = new WebComponent("upload"),
+						     ivUploading = new WebComponent("uploading"),
+						     ivDownload = new WebComponent("download");
+				//These invisible components will be used to fill in the unused components.
+				ivUpload.setVisible(false);
+				ivUploading.setVisible(false);
+				ivDownload.setVisible(false);
 				//Components for file upload status.
 				if (!item.getModelObject().isUploaded() && item.getModelObject().getRelPath() == null){
 					//Item has no file.
-					AjaxFallbackLink<Book> uploadLink = new AjaxFallbackLink<Book>("fileButton") {
+					AjaxFallbackLink<Book> uploadLink = new AjaxFallbackLink<Book>("upload") {
 						private static final long serialVersionUID = 5004785066659183906L;
 
 						@Override
@@ -199,24 +207,28 @@ public class HomePage extends PageTemplate {
 						}
 					};
 					uploadLink.setModel(item.getModel());
-					Label label = new Label("fileMessage", "Add File");
-					uploadLink.add(label);
 					item.add(uploadLink);
+					
+					item.add(ivUploading);
+					item.add(ivDownload);
 				}else if (!item.getModelObject().isUploaded()){
 					//Item's file is currently uploading.
-					WebMarkupContainer uploadingButton = new WebMarkupContainer("fileButton");
-					Label label = new Label("fileMessage", "Uploading");
-					uploadingButton.add(label);
+					WebMarkupContainer uploadingButton = new WebMarkupContainer("uploading");
 					item.add(uploadingButton);
+					
+					item.add(ivUpload);
+					item.add(ivDownload);
 				}else{
 					//Item's file is uploaded.
-					File f = item.getModelObject().getFile();
-					String clientName = f.getPath().substring(36);
-					DownloadLink downloadingButton = 
-							new DownloadLink("fileButton", f, clientName);
-					Label label = new Label("fileMessage", "Download");
-					downloadingButton.add(label);
-					item.add(downloadingButton);
+					DownloadLink dl;
+					if ((dl = item.getModelObject().makeDownloadLink("download")) != null){
+						item.add(dl);
+					}else{
+						item.add(ivDownload);
+					}
+					
+					item.add(ivUpload);
+					item.add(ivUploading);
 				}
 			}
 		};

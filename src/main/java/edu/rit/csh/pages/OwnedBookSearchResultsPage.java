@@ -17,9 +17,11 @@ import org.apache.wicket.datetime.StyleDateConverter;
 import org.apache.wicket.datetime.markup.html.form.DateTextField;
 import org.apache.wicket.extensions.yui.calendar.DatePicker;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.link.DownloadLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.PropertyModel;
@@ -98,6 +100,14 @@ public class OwnedBookSearchResultsPage extends PageTemplate {
 				item.add(borrowLink);
 				
 				item.add(borrowForm);
+				DownloadLink dlLink = b.makeDownloadLink("download");
+				if (dlLink != null){
+					item.add(dlLink);
+				}else{
+					WebComponent wc = new WebComponent("download");
+					wc.setVisible(false);
+					item.add(wc);
+				}
 			}
 		});
 	}
