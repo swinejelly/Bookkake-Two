@@ -36,6 +36,7 @@ public class BookInfoTest {
 		testSess.beginTransaction();
 		BookInfo info1 = (BookInfo)testSess.get(BookInfo.class, "9781604598919");
 		BookInfo info2 = (BookInfo)testSess.get(BookInfo.class, "9780142409848");
+		@SuppressWarnings("unchecked")
 		List<BookInfo> infos = testSess.createCriteria(BookInfo.class).list();
 		
 		assertEquals(2, infos.size());

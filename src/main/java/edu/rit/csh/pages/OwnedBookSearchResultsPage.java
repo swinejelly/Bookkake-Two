@@ -33,7 +33,7 @@ import edu.rit.csh.models.Book;
 import edu.rit.csh.models.BookInfo;
 
 public class OwnedBookSearchResultsPage extends PageTemplate {
-	private static final long serialVersionUID = 7610159315337229723L;
+	private static final long serialVersionUID = 1L;
 
 	public OwnedBookSearchResultsPage(){
 		super();
@@ -46,14 +46,14 @@ public class OwnedBookSearchResultsPage extends PageTemplate {
 		
 		BookInfo info = BookInfo.getBookInfo(isbn);
 		
-		add(new Label("title", new PropertyModel(info, "title")));
-		add(new Label("publisher", new PropertyModel(info, "publisher")));
-		add(new Label("authors", new PropertyModel(info, "authors")));
-		add(new Label("description", new PropertyModel(info, "description")));
+		add(new Label("title", new PropertyModel<Object>(info, "title")));
+		add(new Label("publisher", new PropertyModel<Object>(info, "publisher")));
+		add(new Label("authors", new PropertyModel<Object>(info, "authors")));
+		add(new Label("description", new PropertyModel<Object>(info, "description")));
 		
 		WebMarkupContainer img = new WebMarkupContainer("img");
 		img.add(AttributeModifier.replace("src",
-			new PropertyModel(info, "thumbnailURL")));
+			new PropertyModel<Object>(info, "thumbnailURL")));
 		add(img);
 		
 		List<Book> activeBooks = Book.getBooksByIsbn(isbn);
@@ -75,19 +75,19 @@ public class OwnedBookSearchResultsPage extends PageTemplate {
 		activeBooks.removeAll(possessedBooks);
 		
 		add(new ListView<Book>("book", activeBooks) {
-			private static final long serialVersionUID = 1047917720579988798L;
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void populateItem(ListItem<Book> item) {
 				Book b = item.getModelObject();
-				item.add(new Label("owner", new PropertyModel(users.get(b.getOwnerUID()), "givenname")));
+				item.add(new Label("owner", new PropertyModel<Object>(users.get(b.getOwnerUID()), "givenname")));
 				item.add(new Label("status", "STATUS"));
 				final BorrowBookForm borrowForm = new BorrowBookForm("borrowDateSelect");
 				borrowForm.setVisible(false);
 				borrowForm.setOutputMarkupPlaceholderTag(true);
-				AjaxLink borrowLink = 
-					new AjaxLink("actions"){
-						private static final long serialVersionUID = 633842873015083341L;
+				AjaxLink<Void> borrowLink = 
+					new AjaxLink<Void>("actions"){
+						private static final long serialVersionUID = 1L;
 						@Override
 						public void onClick(AjaxRequestTarget target) {
 							setVisible(false);
@@ -112,8 +112,8 @@ public class OwnedBookSearchResultsPage extends PageTemplate {
 		});
 	}
 	
-	private class BorrowBookForm extends Form{
-		private static final long serialVersionUID = 934961668590503050L;
+	private class BorrowBookForm extends Form<BorrowBookForm>{
+		private static final long serialVersionUID = 1L;
 		Date date;
 		public BorrowBookForm(String id) {
 			super(id);
@@ -139,7 +139,7 @@ public class OwnedBookSearchResultsPage extends PageTemplate {
 	}
 	
 	private class ReturnDatePicker extends DatePicker{
-		private static final long serialVersionUID = -3239044315676274739L;
+		private static final long serialVersionUID = 1L;
 		
 		public ReturnDatePicker(){
 			super();

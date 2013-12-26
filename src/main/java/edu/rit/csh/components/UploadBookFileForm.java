@@ -10,7 +10,7 @@ import edu.rit.csh.models.Book;
 import edu.rit.csh.pages.HomePage;
 
 public class UploadBookFileForm extends Form<Void> {
-	private static final long serialVersionUID = 474413093694451263L;
+	private static final long serialVersionUID = 1L;
 	private final Button submitButton;
 	private final FileUploadField fileField;
 	private Book book;

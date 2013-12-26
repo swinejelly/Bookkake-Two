@@ -4,7 +4,6 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Calendar;
@@ -24,7 +23,6 @@ import javax.persistence.Transient;
 
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.exception.LdapException;
-import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.link.DownloadLink;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -39,7 +37,7 @@ import edu.rit.csh.auth.LDAPUser;
 @Entity
 @Table(name = "BOOKS")
 public class Book implements Serializable{
-	private static final long serialVersionUID = -8012947208250080965L;
+	private static final long serialVersionUID = 1L;
 	
 	private static SessionFactory sessFact;
 	public static void setSessFact(SessionFactory fact){
@@ -127,6 +125,7 @@ public class Book implements Serializable{
 		sess.beginTransaction();
 		Query qry = sess.createQuery("from Book where ownerUID = :uid and active = true");
 		qry.setParameter("uid", ownerUID);
+		@SuppressWarnings("unchecked")
 		List<Book> ownedBooks = qry.list();
 		sess.getTransaction().commit();
 		sess.close();
@@ -153,6 +152,7 @@ public class Book implements Serializable{
 		//List<Book> possessedBooks = getPossessedBooks(sess, when, possessorUID);
 		Query qry = sess.createQuery("from Book where (ownerUID = :uid or borrowPeriod != null) and active = true");
 		qry.setParameter("uid", possessorUID);
+		@SuppressWarnings("unchecked")
 		List<Book> possessedBooks = qry.list();
 		Iterator<Book> iter = possessedBooks.iterator();
 		while (iter.hasNext()){
@@ -195,6 +195,7 @@ public class Book implements Serializable{
 		sess.beginTransaction();
 		Query qry = sess.createQuery("from Book where isbn = :isbn and active = true");
 		qry.setParameter("isbn", isbn);
+		@SuppressWarnings("unchecked")
 		List<Book> books = qry.list();
 		sess.getTransaction().commit();
 		sess.close();

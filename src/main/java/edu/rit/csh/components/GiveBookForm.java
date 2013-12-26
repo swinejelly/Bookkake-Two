@@ -1,6 +1,5 @@
 package edu.rit.csh.components;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -22,7 +21,7 @@ import edu.rit.csh.models.Book;
 import edu.rit.csh.pages.HomePage;
 
 public class GiveBookForm extends Form<Book> {
-	private static final long serialVersionUID = 474413093694451263L;
+	private static final long serialVersionUID = 1L;
 	private final UserRealNameAutoCompleteTextField titleField;
 	private final Button submitButton;
 	private String username;
@@ -60,7 +59,7 @@ public class GiveBookForm extends Form<Book> {
 	
 	
 	public class UserRealNameAutoCompleteTextField extends DefaultCssAutoCompleteTextField<String>{
-		private static final long serialVersionUID = -374902838577270374L;
+		private static final long serialVersionUID = 1L;
 		private List<LDAPUser> users;
 
 		public UserRealNameAutoCompleteTextField(String id, List<LDAPUser> users) {
@@ -68,7 +67,8 @@ public class GiveBookForm extends Form<Book> {
 			this.users = users;
 			
 			add(new OnChangeAjaxBehavior() {
-				
+				private static final long serialVersionUID = 1L;
+
 				@Override
 				protected void onUpdate(AjaxRequestTarget target) {
 					String input = UserRealNameAutoCompleteTextField.this.getValue();

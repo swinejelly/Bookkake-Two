@@ -17,8 +17,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import edu.rit.csh.models.BookInfo;
 import edu.rit.csh.pages.OwnedBookSearchResultsPage;
 
-public class SearchOwnedBookForm extends Form {
-	private static final long serialVersionUID = -3461822475517395754L;
+public class SearchOwnedBookForm extends Form<SearchOwnedBookForm> {
+	private static final long serialVersionUID = 1L;
 	
 	private String title;
 	private final BookAutoCompleteField titleField;
@@ -61,7 +61,8 @@ public class SearchOwnedBookForm extends Form {
 		}
 	}
 	
-	private class BookAutoCompleteField extends DefaultCssAutoCompleteTextField{
+	private class BookAutoCompleteField extends DefaultCssAutoCompleteTextField<String>{
+		private static final long serialVersionUID = 1L;
 		private List<String> choices;
 
 		public BookAutoCompleteField(String id, List<String> choices) {
@@ -69,7 +70,8 @@ public class SearchOwnedBookForm extends Form {
 			this.choices = choices;
 			
 			add(new OnChangeAjaxBehavior() {
-				
+				private static final long serialVersionUID = 1L;
+
 				@Override
 				protected void onUpdate(AjaxRequestTarget target) {
 					String input = BookAutoCompleteField.this.getValue();
@@ -85,7 +87,7 @@ public class SearchOwnedBookForm extends Form {
 		}
 
 		@Override
-		protected Iterator getChoices(String input) {
+		protected Iterator<String> getChoices(String input) {
 			List<String> suggestions = new ArrayList<String>();
 			String inputCap = input.toUpperCase();
 			for (String title: choices){

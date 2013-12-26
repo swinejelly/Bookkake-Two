@@ -1,7 +1,5 @@
 package edu.rit.csh.pages;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -17,7 +15,6 @@ import org.apache.wicket.markup.html.link.DownloadLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.PropertyModel;
-import org.joda.time.field.DividedDateTimeField;
 
 import edu.rit.csh.auth.UserWebSession;
 import edu.rit.csh.components.GiveBookPanel;
@@ -25,10 +22,9 @@ import edu.rit.csh.components.SearchBookPanel;
 import edu.rit.csh.components.SearchOwnedBookPanel;
 import edu.rit.csh.components.UploadBookFilePanel;
 import edu.rit.csh.models.Book;
-import edu.rit.csh.models.BookInfo;
 
 public class HomePage extends PageTemplate {
-	private static final long serialVersionUID = -5915056470130165360L;
+	private static final long serialVersionUID = 1L;
 	
 	/**
 	 * The current action of the HomeContent.
@@ -45,12 +41,12 @@ public class HomePage extends PageTemplate {
 	/**
 	 * The link to add a book.
 	 */
-	private AjaxLink addBookLink;
+	private AjaxLink<Void> addBookLink;
 	
 	/**
 	 * The link to search for a book.
 	 */
-	private AjaxLink searchBookLink;
+	private AjaxLink<Void> searchBookLink;
 
 	public HomePage(){
 		super();
@@ -60,8 +56,8 @@ public class HomePage extends PageTemplate {
 		actionTitle = new Label("actionTitle", "Action");
 		actionTitle.setOutputMarkupId(true);
 		add(actionTitle);
-		addBookLink = new AjaxLink("addBookLink"){
-			private static final long serialVersionUID = 2908147205998969131L;
+		addBookLink = new AjaxLink<Void>("addBookLink"){
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -84,8 +80,8 @@ public class HomePage extends PageTemplate {
 			
 		};
 		
-		searchBookLink = new AjaxLink("searchBookLink"){
-			private static final long serialVersionUID = -263111810841234937L;
+		searchBookLink = new AjaxLink<Void>("searchBookLink"){
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -130,16 +126,16 @@ public class HomePage extends PageTemplate {
 		
 		final ListView<Book> ownedPossessedBooksView = 
 		new ListView<Book>("ownedPossessedBooks", userOwnedPossessedBooks){
-			private static final long serialVersionUID = -4592905416065301177L;
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void populateItem(final ListItem<Book> item) {
 				//Add title
-				item.add(new Label("title", new PropertyModel(item.getModel(), "bookInfo.title")));
+				item.add(new Label("title", new PropertyModel<Book>(item.getModel(), "bookInfo.title")));
 				
 				//Add link to delete book
 				AjaxFallbackLink<Book> deleteLink = new AjaxFallbackLink<Book>("delete"){
-					private static final long serialVersionUID = 589193295987221975L;
+					private static final long serialVersionUID = 1L;
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						getModelObject().delete();
@@ -150,7 +146,7 @@ public class HomePage extends PageTemplate {
 				item.add(deleteLink);
 				
 				AjaxFallbackLink<Book> giveLink = new AjaxFallbackLink<Book>("give"){
-					private static final long serialVersionUID = 7307145740090680691L;
+					private static final long serialVersionUID = 1L;
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						GiveBookPanel givePanel = null;
@@ -187,7 +183,7 @@ public class HomePage extends PageTemplate {
 				if (!item.getModelObject().isUploaded() && item.getModelObject().getRelPath() == null){
 					//Item has no file.
 					AjaxFallbackLink<Book> uploadLink = new AjaxFallbackLink<Book>("upload") {
-						private static final long serialVersionUID = 5004785066659183906L;
+						private static final long serialVersionUID = 1L;
 
 						@Override
 						public void onClick(AjaxRequestTarget target) {
@@ -237,16 +233,16 @@ public class HomePage extends PageTemplate {
 		
 		final ListView<Book> borrowedBooksView =
 		new ListView<Book>("borrowedBooks", userBorrowedBooks){
-			private static final long serialVersionUID = 2736041904670215404L;
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void populateItem(final ListItem<Book> item) {
 				//add title
-				item.add(new Label("title", new PropertyModel(item.getModel(), "bookInfo.title")));
+				item.add(new Label("title", new PropertyModel<Book>(item.getModel(), "bookInfo.title")));
 				
 				//Add link to return book to other user.
 				AjaxFallbackLink<Book> returnLink = new AjaxFallbackLink<Book>("return"){
-					private static final long serialVersionUID = -7032759365273183041L;
+					private static final long serialVersionUID = 1L;
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
@@ -264,15 +260,15 @@ public class HomePage extends PageTemplate {
 		
 		final ListView<Book> lentBooksView =
 				new ListView<Book>("lentBooks", userLentBooks){
-					private static final long serialVersionUID = 2736041904670215404L;
+					private static final long serialVersionUID = 1L;
 
 					@Override
 					protected void populateItem(final ListItem<Book> item) {
 						//add title
-						item.add(new Label("title", new PropertyModel(item.getModel(), "bookInfo.title")));
+						item.add(new Label("title", new PropertyModel<Book>(item.getModel(), "bookInfo.title")));
 						
 						AjaxFallbackLink<Book> returnLink = new AjaxFallbackLink<Book>("return"){
-							private static final long serialVersionUID = -7032759365273183041L;
+							private static final long serialVersionUID = 1L;
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {

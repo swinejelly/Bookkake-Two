@@ -26,7 +26,7 @@ import edu.rit.csh.googlebooks.QueryExecutor;
 @Entity
 @Table(name="BOOKINFOS")
 public class BookInfo implements Serializable{
-	private static final long serialVersionUID = -271644167475844819L;
+	private static final long serialVersionUID = 1L;
 	private static SessionFactory sessFact;
 	public static void setSessFact(SessionFactory fact){
 		sessFact = fact;
@@ -163,6 +163,7 @@ public class BookInfo implements Serializable{
 	public static List<BookInfo> getAllBookInfos(){
 		Session sess = WicketApplication.getWicketApplication().getSessionFactory().openSession();
 		sess.beginTransaction();
+		@SuppressWarnings("unchecked")
 		List<BookInfo> books = sess.createCriteria(BookInfo.class).list();
 		sess.getTransaction().commit();
 		sess.close();

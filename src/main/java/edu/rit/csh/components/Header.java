@@ -10,12 +10,12 @@ import edu.rit.csh.auth.UserWebSession;
 import edu.rit.csh.pages.HomePage;
 
 public class Header extends Panel {
-	private static final long serialVersionUID = -1301661843720137382L;
+	private static final long serialVersionUID = 1L;
 
 	public Header(String id) {
 		super(id);
-		add(new Link("homeLink"){
-			private static final long serialVersionUID = 2053508690580582210L;
+		add(new Link<Void>("homeLink"){
+			private static final long serialVersionUID = 1L;
 			@Override
 			public void onClick(){
 				setResponsePage(HomePage.class);
@@ -26,8 +26,8 @@ public class Header extends Panel {
 	}
 
 	
-	public class SwitchUserForm extends Form{
-		private static final long serialVersionUID = 7878165819846406503L;
+	public class SwitchUserForm extends Form<Void>{
+		private static final long serialVersionUID = 1L;
 		private String uid;
 
 		public SwitchUserForm(String id) {

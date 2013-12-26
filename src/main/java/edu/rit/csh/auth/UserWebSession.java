@@ -1,7 +1,5 @@
 package edu.rit.csh.auth;
 
-import java.io.IOException;
-
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.wicket.protocol.http.WebSession;
@@ -12,7 +10,7 @@ import edu.rit.csh.WicketApplication;
  * A Websession that holds an LDAP user. 
  */
 public class UserWebSession extends WebSession {
-	private static final long serialVersionUID = -8542214390684177113L;
+	private static final long serialVersionUID = 1L;
 	
 	private LDAPUser user;
 	

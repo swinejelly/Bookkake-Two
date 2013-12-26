@@ -15,8 +15,8 @@ import edu.rit.csh.pages.PublicSearchResultsPage;
  * @author scott
  *
  */
-public class SearchBookForm extends Form {
-	private static final long serialVersionUID = 8123125720433269221L;
+public class SearchBookForm extends Form<SearchBookForm> {
+	private static final long serialVersionUID = 1L;
 	
 	private String title;
 	private String author;
@@ -25,11 +25,11 @@ public class SearchBookForm extends Form {
 		super(id);
 		setDefaultModel(new CompoundPropertyModel<SearchBookForm>(this));
 		
-		TextField title = new TextField("title");
+		TextField<String> title = new TextField<>("title");
 		title.setLabel(Model.of("Title"));
 		add(title);
 		
-		TextField author = new TextField("author");
+		TextField<String> author = new TextField<>("author");
 		author.setLabel(Model.of("Author"));
 		author.setRequired(false);
 		add(author);

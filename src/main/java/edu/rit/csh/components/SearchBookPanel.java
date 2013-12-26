@@ -3,7 +3,7 @@ package edu.rit.csh.components;
 import org.apache.wicket.markup.html.panel.Panel;
 
 public class SearchBookPanel extends Panel {
-	private static final long serialVersionUID = 4461133275889450083L;
+	private static final long serialVersionUID = 1L;
 	
 	private final SearchBookForm form;
 

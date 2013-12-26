@@ -10,7 +10,7 @@ import java.io.Serializable;
  *
  */
 public class LDAPUser implements Serializable{
-	private static final long serialVersionUID = 5065891838645625266L;
+	private static final long serialVersionUID = 1L;
 	/**Username*/
 	private String uid;
 	/**First/nickname*/

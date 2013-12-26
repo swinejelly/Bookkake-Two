@@ -53,6 +53,7 @@ public class BookTest {
 		
 		Session session = sessFact.openSession();
 		session.beginTransaction();
+		@SuppressWarnings("unchecked")
 		List<Book> results = session.createQuery("from Book").list();
 		assertEquals(2, results.size());
 		for (Book b: results){

@@ -7,7 +7,7 @@ import edu.rit.csh.components.Footer;
 import edu.rit.csh.components.Header;
 
 public class PageTemplate extends WebPage {
-	private static final long serialVersionUID = -6071606580892913447L;
+	private static final long serialVersionUID = 1L;
 	
 	private   final MarkupContainer header;
 	private   final MarkupContainer footer;

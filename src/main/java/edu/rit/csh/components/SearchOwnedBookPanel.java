@@ -9,7 +9,7 @@ import org.apache.wicket.markup.html.panel.Panel;
  *
  */
 public class SearchOwnedBookPanel extends Panel {
-	private static final long serialVersionUID = -7887042907526741946L;
+	private static final long serialVersionUID = 1L;
 	
 	private final SearchOwnedBookForm form;
 	
