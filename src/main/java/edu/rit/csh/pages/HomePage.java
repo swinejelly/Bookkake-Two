@@ -5,9 +5,11 @@ import java.util.List;
 
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.exception.LdapException;
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel;
 import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -26,37 +28,20 @@ import edu.rit.csh.models.Book;
 public class HomePage extends PageTemplate {
 	private static final long serialVersionUID = 1L;
 	
-	/**
-	 * The current action of the HomeContent.
-	 * Defaults to a blank WebMarkupContainer, but can be replaced
-	 * via AJAX to something more complicated.
-	 */
-	private WebMarkupContainer action;
-	
-	/**
-	 * The Title for action
-	 */
-	private Label actionTitle;
-	
-	/**
-	 * The link to add a book.
-	 */
-	private AjaxLink<Void> addBookLink;
-	
-	/**
-	 * The link to search for a book.
-	 */
-	private AjaxLink<Void> searchBookLink;
-
 	public HomePage(){
 		super();
-		action = new WebMarkupContainer("action");
-		action.setOutputMarkupId(true);
 		
-		actionTitle = new Label("actionTitle", "Action");
+		final WebMarkupContainer action = new WebMarkupContainer("action");
+		action.setOutputMarkupId(true);
+		add(action);
+		
+		final Label actionTitle = new Label("actionTitle", "Action");
 		actionTitle.setOutputMarkupId(true);
 		add(actionTitle);
-		addBookLink = new AjaxLink<Void>("addBookLink"){
+		/**
+		 * Link to add a book.
+		 */
+		add(new AjaxLink<Void>("addBookLink"){
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -73,14 +58,10 @@ public class HomePage extends PageTemplate {
 				l.setOutputMarkupId(true);
 				actionTitle.replaceWith(l);
 				target.add(l);
-				
-				action = actionPanel;
-				actionTitle = l;
 			}
-			
-		};
+		});
 		
-		searchBookLink = new AjaxLink<Void>("searchBookLink"){
+		add(new AjaxLink<Void>("searchBookLink"){
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -96,15 +77,10 @@ public class HomePage extends PageTemplate {
 				l.setOutputMarkupId(true);
 				actionTitle.replaceWith(l);
 				target.add(l);
-				
-				action = actionPanel;
-				actionTitle = l;
 			}
-		};
+		});
 		
-		add(action);
-		add(addBookLink);
-		add(searchBookLink);
+		
 		
 		String uidNum = ((UserWebSession)getSession()).getUser().getUidnumber();
 		//List of all books OWNED by the user.
@@ -149,22 +125,27 @@ public class HomePage extends PageTemplate {
 					private static final long serialVersionUID = 1L;
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						GiveBookPanel givePanel = null;
-						try{
-							givePanel = new GiveBookPanel("action", getModelObject());
-						}catch (LdapException | CursorException e){
-							e.printStackTrace();
-							return;
-						}
+						final Book b = getModelObject();
+						AjaxLazyLoadPanel givePanel = null;
+						givePanel = new AjaxLazyLoadPanel("action") {
+							private static final long serialVersionUID = 1L;
+
+							@Override
+							public Component getLazyLoadComponent(String markupId) {
+								try {
+									return new GiveBookPanel(markupId, b);
+								} catch (LdapException | CursorException e) {
+									e.printStackTrace();
+									return new Label(markupId, "Could not retrieve usernames.");
+								}
+							}
+						};
 						givePanel.setOutputMarkupId(true);
 						Label giveLabel = new Label("actionTitle", "Give Book");
 						giveLabel.setOutputMarkupId(true);
 						
 						action.replaceWith(givePanel);
 						actionTitle.replaceWith(giveLabel);
-						
-						action = givePanel;
-						actionTitle = giveLabel;
 						
 						target.add(givePanel, giveLabel);
 					}
@@ -195,9 +176,6 @@ public class HomePage extends PageTemplate {
 
 							action.replaceWith(uploadPanel);
 							actionTitle.replaceWith(uploadLabel);
-
-							action = uploadPanel;
-							actionTitle = uploadLabel;
 
 							target.add(action, actionTitle);
 						}
@@ -260,30 +238,30 @@ public class HomePage extends PageTemplate {
 		
 		final ListView<Book> lentBooksView =
 				new ListView<Book>("lentBooks", userLentBooks){
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void populateItem(final ListItem<Book> item) {
+				//add title
+				item.add(new Label("title", new PropertyModel<Book>(item.getModel(), "bookInfo.title")));
+
+				AjaxFallbackLink<Book> returnLink = new AjaxFallbackLink<Book>("return"){
 					private static final long serialVersionUID = 1L;
 
 					@Override
-					protected void populateItem(final ListItem<Book> item) {
-						//add title
-						item.add(new Label("title", new PropertyModel<Book>(item.getModel(), "bookInfo.title")));
-						
-						AjaxFallbackLink<Book> returnLink = new AjaxFallbackLink<Book>("return"){
-							private static final long serialVersionUID = 1L;
-
-							@Override
-							public void onClick(AjaxRequestTarget target) {
-								getModelObject().removeBorrow();
-								setResponsePage(HomePage.class);
-							}
-						};
-						returnLink.setModel(item.getModel());
-		 
-						item.add(returnLink);		
-						
+					public void onClick(AjaxRequestTarget target) {
+						getModelObject().removeBorrow();
+						setResponsePage(HomePage.class);
 					}
 				};
-				lentBooksView.setOutputMarkupId(true);
-				add(lentBooksView);
+				returnLink.setModel(item.getModel());
+
+				item.add(returnLink);		
+
+			}
+		};
+		lentBooksView.setOutputMarkupId(true);
+		add(lentBooksView);
 
 	}
 }
