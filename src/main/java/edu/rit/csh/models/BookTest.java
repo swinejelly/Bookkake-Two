@@ -49,7 +49,7 @@ public class BookTest {
 		//Wealth of Nations
 		Book.createBook("9780857081087", "5678");
 		//War of the Worlds
-		Book.createBook("1604598913", "1234");
+		Book.createBook("9781604502442", "1234");
 		
 		Session session = sessFact.openSession();
 		session.beginTransaction();
