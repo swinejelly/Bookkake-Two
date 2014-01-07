@@ -393,7 +393,7 @@ public class Book implements Serializable{
 				return getOwner();
 			}else if (borrowPeriod.getBegin().compareTo(date) <= 0 &&
 				borrowPeriod.getEnd().compareTo(date) >= 0){
-				return WicketApplication.getWicketApplication().getLDAPProxy().getUser(ownerUID);
+				return WicketApplication.getWicketApplication().getLDAPProxy().getUser(borrowPeriod.getBorrowerUID());
 			}else{
 				return getOwner();
 			}
