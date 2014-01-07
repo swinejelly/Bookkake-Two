@@ -2,6 +2,7 @@ package edu.rit.csh.pages;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.exception.LdapException;
@@ -30,14 +31,18 @@ public class HomePage extends PageTemplate {
 	
 	public HomePage(){
 		super();
+		final AtomicReference<WebMarkupContainer> actionAtom = new AtomicReference<>(
+				new WebMarkupContainer("action")
+		);
+				
+		actionAtom.get().setOutputMarkupId(true);
+		add(actionAtom.get());
 		
-		final WebMarkupContainer action = new WebMarkupContainer("action");
-		action.setOutputMarkupId(true);
-		add(action);
-		
-		final Label actionTitle = new Label("actionTitle", "Action");
-		actionTitle.setOutputMarkupId(true);
-		add(actionTitle);
+		final AtomicReference<Label> actionTitleAtom = new AtomicReference<>(
+				new Label("actionTitle", "Action")
+		);
+		actionTitleAtom.get().setOutputMarkupId(true);
+		add(actionTitleAtom.get());
 		/**
 		 * Link to add a book.
 		 */
@@ -47,16 +52,18 @@ public class HomePage extends PageTemplate {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				//construct the new SearchBookPanel
-				WebMarkupContainer actionPanel = new SearchBookPanel("action");
+				WebMarkupContainer actionPanel = new SearchBookPanel(actionAtom.get().getId());
 				actionPanel.setOutputMarkupId(true);
 				//Replace it in the page hierarchy
-				action.replaceWith(actionPanel);
+				actionAtom.get().replaceWith(actionPanel);
+				actionAtom.set(actionPanel);
 				//Communicate change to client
 				target.add(actionPanel);
 				//replace actionTitle
-				Label l = new Label("actionTitle", "Add Book");
+				Label l = new Label(actionTitleAtom.get().getId(), "Add Book");
 				l.setOutputMarkupId(true);
-				actionTitle.replaceWith(l);
+				actionTitleAtom.get().replaceWith(l);
+				actionTitleAtom.set(l);
 				target.add(l);
 			}
 		});
@@ -67,15 +74,17 @@ public class HomePage extends PageTemplate {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				//Construct SearchOwnedBookPanel
-				WebMarkupContainer actionPanel = new SearchOwnedBookPanel("action");
+				WebMarkupContainer actionPanel = new SearchOwnedBookPanel(actionAtom.get().getId());
 				actionPanel.setOutputMarkupId(true);
 				//replace
-				action.replaceWith(actionPanel);
+				actionAtom.get().replaceWith(actionPanel);
+				actionAtom.set(actionPanel);
 				//return panel to client.
 				target.add(actionPanel);
-				Label l = new Label("actionTitle", "Borrow Book");
+				Label l = new Label(actionTitleAtom.get().getId(), "Borrow Book");
 				l.setOutputMarkupId(true);
-				actionTitle.replaceWith(l);
+				actionTitleAtom.get().replaceWith(l);
+				actionTitleAtom.set(l);
 				target.add(l);
 			}
 		});
@@ -127,7 +136,7 @@ public class HomePage extends PageTemplate {
 					public void onClick(AjaxRequestTarget target) {
 						final Book b = getModelObject();
 						AjaxLazyLoadPanel givePanel = null;
-						givePanel = new AjaxLazyLoadPanel("action") {
+						givePanel = new AjaxLazyLoadPanel(actionAtom.get().getId()) {
 							private static final long serialVersionUID = 1L;
 
 							@Override
@@ -141,11 +150,13 @@ public class HomePage extends PageTemplate {
 							}
 						};
 						givePanel.setOutputMarkupId(true);
-						Label giveLabel = new Label("actionTitle", "Give Book");
-						giveLabel.setOutputMarkupId(true);
+						actionAtom.get().replaceWith(givePanel);
+						actionAtom.set(givePanel);
 						
-						action.replaceWith(givePanel);
-						actionTitle.replaceWith(giveLabel);
+						Label giveLabel = new Label(actionTitleAtom.get().getId(), "Give Book");
+						giveLabel.setOutputMarkupId(true);
+						actionTitleAtom.get().replaceWith(giveLabel);
+						actionTitleAtom.set(giveLabel);
 						
 						target.add(givePanel, giveLabel);
 					}
@@ -174,10 +185,12 @@ public class HomePage extends PageTemplate {
 							Label uploadLabel = new Label("actionTitle", labelStr);
 							uploadLabel.setOutputMarkupId(true);
 
-							action.replaceWith(uploadPanel);
-							actionTitle.replaceWith(uploadLabel);
+							actionAtom.get().replaceWith(uploadPanel);
+							actionAtom.set(uploadPanel);
+							actionTitleAtom.get().replaceWith(uploadLabel);
+							actionTitleAtom.set(uploadLabel);
 
-							target.add(action, actionTitle);
+							target.add(actionAtom.get(), actionTitleAtom.get());
 						}
 					};
 					uploadLink.setModel(item.getModel());
