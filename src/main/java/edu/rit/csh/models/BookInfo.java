@@ -228,4 +228,13 @@ public class BookInfo implements Serializable{
 	public void setBooks(List<Book> books) {
 		this.books = books;
 	}
+	
+	@Override
+	public boolean equals(Object o){
+		if (o instanceof BookInfo && ((BookInfo)o).getIsbn().equals(isbn)){
+			return true;
+		}else{
+			return false;
+		}
+	}
 }

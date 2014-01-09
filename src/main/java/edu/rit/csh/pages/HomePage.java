@@ -1,5 +1,6 @@
 package edu.rit.csh.pages;
 
+import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -19,6 +20,7 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.PropertyModel;
 
+import edu.rit.csh.auth.LDAPUser;
 import edu.rit.csh.auth.UserWebSession;
 import edu.rit.csh.components.GiveBookPanel;
 import edu.rit.csh.components.SearchBookPanel;
@@ -230,7 +232,10 @@ public class HomePage extends PageTemplate {
 			protected void populateItem(final ListItem<Book> item) {
 				//add title
 				item.add(new Label("title", new PropertyModel<Book>(item.getModel(), "bookInfo.title")));
+				//Add who the borrower is
 				
+				LDAPUser borrower = item.getModelObject().getOwner();
+				item.add(new Label("lender", new PropertyModel<LDAPUser>(borrower, "uid")));
 				//Add link to return book to other user.
 				AjaxFallbackLink<Book> returnLink = new AjaxFallbackLink<Book>("return"){
 					private static final long serialVersionUID = 1L;
@@ -257,7 +262,9 @@ public class HomePage extends PageTemplate {
 			protected void populateItem(final ListItem<Book> item) {
 				//add title
 				item.add(new Label("title", new PropertyModel<Book>(item.getModel(), "bookInfo.title")));
-
+				//add the borrower
+				LDAPUser borrower = item.getModelObject().getPossessor(Calendar.getInstance());
+				item.add(new Label("borrower", new PropertyModel<LDAPUser>(borrower, "uid")));
 				AjaxFallbackLink<Book> returnLink = new AjaxFallbackLink<Book>("return"){
 					private static final long serialVersionUID = 1L;
 

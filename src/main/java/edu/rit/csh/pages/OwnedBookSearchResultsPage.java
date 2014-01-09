@@ -42,7 +42,6 @@ public class OwnedBookSearchResultsPage extends PageTemplate {
 	public OwnedBookSearchResultsPage(PageParameters params) throws IOException, LdapException, CursorException{
 		super();
 		String isbn = params.get("isbn").toString();
-		System.out.println(isbn);
 		
 		BookInfo info = BookInfo.getBookInfo(isbn);
 		
@@ -62,17 +61,13 @@ public class OwnedBookSearchResultsPage extends PageTemplate {
 			if (!users.containsKey(b.getOwnerUID())){
 				LDAPUser user = b.getOwner();
 				users.put(b.getOwnerUID(), user);
-				System.out.println(user.getGivenname());
 			}
 		}
 		final LDAPUser user = ((UserWebSession)this.getSession()).getUser();
 		
 		//Remove all books owned or possessed by the user.
-		List<Book> ownedBooks = Book.getOwnedBooks(user.getUidnumber());
-		List<Book> possessedBooks = Book.getPossessedBooks(user.getUidnumber());
-		
-		activeBooks.removeAll(ownedBooks);
-		activeBooks.removeAll(possessedBooks);
+		List<Book> unpossessedBooks = Book.getUnpossessedBooks(user.getUidnumber());
+		activeBooks.retainAll(unpossessedBooks);
 		
 		add(new ListView<Book>("book", activeBooks) {
 			private static final long serialVersionUID = 1L;
@@ -80,13 +75,23 @@ public class OwnedBookSearchResultsPage extends PageTemplate {
 			@Override
 			protected void populateItem(ListItem<Book> item) {
 				Book b = item.getModelObject();
+				Calendar now = Calendar.getInstance();
+				String ownerUID = b.getOwnerUID();
+				LDAPUser possessor = b.getPossessor(now);
 				item.add(new Label("owner", new PropertyModel<Object>(users.get(b.getOwnerUID()), "givenname")));
-				item.add(new Label("status", "STATUS"));
-				final BorrowBookForm borrowForm = new BorrowBookForm("borrowDateSelect");
-				borrowForm.setVisible(false);
-				borrowForm.setOutputMarkupPlaceholderTag(true);
-				AjaxLink<Void> borrowLink = 
-					new AjaxLink<Void>("actions"){
+				boolean borrowed = !ownerUID.equals(possessor.getUidnumber());
+				if (!borrowed){
+					item.add(new Label("status", "Owned by " + possessor.getUid()));
+				}else{
+					item.add(new Label("status", "Borrowed by " + possessor.getUid()));
+				}
+				
+				if (!borrowed){
+					final BorrowBookForm borrowForm = new BorrowBookForm("borrowDateSelect");
+					borrowForm.setVisible(false);
+					borrowForm.setOutputMarkupPlaceholderTag(true);
+					AjaxLink<Void> borrowLink = 
+							new AjaxLink<Void>("actions"){
 						private static final long serialVersionUID = 1L;
 						@Override
 						public void onClick(AjaxRequestTarget target) {
@@ -95,11 +100,19 @@ public class OwnedBookSearchResultsPage extends PageTemplate {
 							borrowForm.setVisible(true);
 							target.add(borrowForm);
 						}
-				};
-				borrowLink.setOutputMarkupId(true);
-				item.add(borrowLink);
+					};
+					borrowLink.setOutputMarkupId(true);
+					item.add(borrowLink);
+					item.add(borrowForm);
+				}else{
+					WebComponent invisibleButton = new WebComponent("actions");
+					invisibleButton.setVisible(false);
+					item.add(invisibleButton);
+					WebComponent invisibleForm = new WebComponent("borrowDateSelect");
+					invisibleForm.setVisible(false);
+					item.add(invisibleForm);
+				}
 				
-				item.add(borrowForm);
 				DownloadLink dlLink = b.makeDownloadLink("download");
 				if (dlLink != null){
 					item.add(dlLink);

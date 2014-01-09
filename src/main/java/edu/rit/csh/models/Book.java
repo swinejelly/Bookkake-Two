@@ -133,8 +133,8 @@ public class Book implements Serializable{
 	}
 	
 	/**
-	 * Return all books belonging to the user possessorUID or that are 
-	 * currently being borrowed by possessorUID.
+	 * Return all books belonging to the user possessorUID and not being borrowed
+	 * or that are currently being borrowed by possessorUID.
 	 * @return list of all books possessed by user.
 	 */
 	public static List<Book> getPossessedBooks(String possessorUID){
@@ -163,17 +163,13 @@ public class Book implements Serializable{
 			}else if (b.getOwnerUID().equals(possessorUID) && b.borrowPeriod != null){
 				//if the book has an associated BorrowPeriod we need to verify that
 				//the book is not currently lent out.
-				int beginComp = b.borrowPeriod.getBegin().compareTo(when);
-				int endComp = b.borrowPeriod.getEnd().compareTo(when);
-				if ((beginComp <= 0) && (endComp >= 0)){
+				if (b.getBorrowPeriod().overlaps(when)){
 					iter.remove();
 				}
 			}else if (!b.getOwnerUID().equals(possessorUID) && b.borrowPeriod.getBorrowerUID().equals(possessorUID)){
 				//if the book does not belong to possessorUID (implying it has a BorrowPeriod)
-				//then we should exclude it unless it coincides with b.borrowPeriod
-				int beginComp = b.borrowPeriod.getBegin().compareTo(when);
-				int endComp = b.borrowPeriod.getEnd().compareTo(when);
-				if (!(beginComp <= 0) || !(endComp >= 0)){
+				//then we should include it if it coincides with b.borrowPeriod
+				if (!b.getBorrowPeriod().overlaps(when)){
 					iter.remove();
 				}
 			}else{
@@ -184,6 +180,29 @@ public class Book implements Serializable{
 		sess.getTransaction().commit();
 		sess.close();
 		return possessedBooks;
+	}
+
+	/**
+	 * Return all books that are not possessed by the user.
+	 * @return list of all books borrowable by user.
+	 */
+	@SuppressWarnings("unchecked")
+	public static List<Book> getUnpossessedBooks(String possessorUID){
+		Session sess = sessFact.openSession();
+		sess.beginTransaction();
+		
+		Query qry = sess.createQuery("from Book where ownerUID != :uid and active = true");
+		qry.setParameter("uid", possessorUID);
+		List<Book> books = qry.list();
+		Iterator<Book> iter = books.iterator();
+		while (iter.hasNext()){
+			Book b = iter.next();
+			if (b.borrowPeriod != null && b.borrowPeriod.getBorrowerUID().equals(possessorUID) &&
+					b.borrowPeriod.overlaps(Calendar.getInstance())){
+				iter.remove();
+			}
+		}
+		return books;
 	}
 	
 	/**
@@ -391,8 +410,7 @@ public class Book implements Serializable{
 		try{
 			if (borrowPeriod == null){
 				return getOwner();
-			}else if (borrowPeriod.getBegin().compareTo(date) <= 0 &&
-				borrowPeriod.getEnd().compareTo(date) >= 0){
+			}else if (borrowPeriod.overlaps(date)){
 				return WicketApplication.getWicketApplication().getLDAPProxy().getUser(borrowPeriod.getBorrowerUID());
 			}else{
 				return getOwner();

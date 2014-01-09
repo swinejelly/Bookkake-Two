@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.annotations.GenericGenerator;
@@ -85,5 +86,14 @@ public class BorrowPeriod implements Serializable{
 		this.book = book;
 	}
 	
-	
+	/**
+	 * @param when the time to check
+	 * @return whether "when" is between begin and end.
+	 */
+	@Transient
+	public boolean overlaps(Calendar when){
+		int beginComp = begin.compareTo(when);
+		int endComp = end.compareTo(when);
+		return (beginComp <= 0) && (endComp >= 0);
+	}
 }

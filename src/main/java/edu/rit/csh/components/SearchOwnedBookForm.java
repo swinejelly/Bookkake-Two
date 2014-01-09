@@ -1,8 +1,12 @@
 package edu.rit.csh.components;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -14,6 +18,9 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import edu.rit.csh.auth.UserWebSession;
+import edu.rit.csh.WicketApplication;
+import edu.rit.csh.models.Book;
 import edu.rit.csh.models.BookInfo;
 import edu.rit.csh.pages.OwnedBookSearchResultsPage;
 
@@ -28,8 +35,13 @@ public class SearchOwnedBookForm extends Form<SearchOwnedBookForm> {
 	public SearchOwnedBookForm(String id) {
 		super(id);
 		setDefaultModel(new CompoundPropertyModel<SearchOwnedBookForm>(this));
+		String uidNumber = ((UserWebSession)this.getWebSession()).getUser().getUidnumber();
+		List<Book> unownedBooks = Book.getUnpossessedBooks(uidNumber);
+		bookInfos = new ArrayList<>(unownedBooks.size());
+		for (Book b: unownedBooks){
+			bookInfos.add(b.getBookInfo());
+		}
 		
-		bookInfos = BookInfo.getAllBookInfos();
 		List<String> titles = new ArrayList<String>(bookInfos.size());
 		for (BookInfo b: bookInfos){
 			titles.add(b.getTitle());
@@ -41,7 +53,6 @@ public class SearchOwnedBookForm extends Form<SearchOwnedBookForm> {
 		submitButton = new Button("searchOwnedBookSubmit");
 		submitButton.add(AttributeModifier.replace("class", "ui blue disabled button"));
 		add(submitButton);
-		
 	}
 
 	
