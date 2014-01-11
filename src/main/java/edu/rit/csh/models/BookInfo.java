@@ -122,9 +122,6 @@ public class BookInfo implements Serializable{
 	}
 	
 	public static List<BookInfo> searchBooks(String title, String author, int cap){
-		Session sess = WicketApplication.getWicketApplication().getSessionFactory().openSession();
-		sess.beginTransaction();
-		//
 		List<BookInfo> books = new ArrayList<BookInfo>();
 		
 		GoogleBookAPIQuery qry = WicketApplication.getWicketApplication()
@@ -154,9 +151,6 @@ public class BookInfo implements Serializable{
 				}
 			}
 		}
-		
-		sess.getTransaction().commit();
-		sess.close();
 		return books;
 	}
 	
@@ -165,7 +159,6 @@ public class BookInfo implements Serializable{
 		sess.beginTransaction();
 		@SuppressWarnings("unchecked")
 		List<BookInfo> books = sess.createCriteria(BookInfo.class).list();
-		sess.getTransaction().commit();
 		sess.close();
 		return books;
 	}

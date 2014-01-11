@@ -94,7 +94,6 @@ public class Book implements Serializable{
 		qry.setParameter("isbn", isbn);
 		qry.setParameter("uid", ownerUID);
 		Book b = (Book) qry.uniqueResult();
-		sess.getTransaction().commit();
 		sess.close();
 		return b;
 	}
@@ -127,7 +126,6 @@ public class Book implements Serializable{
 		qry.setParameter("uid", ownerUID);
 		@SuppressWarnings("unchecked")
 		List<Book> ownedBooks = qry.list();
-		sess.getTransaction().commit();
 		sess.close();
 		return ownedBooks;
 	}
@@ -177,7 +175,6 @@ public class Book implements Serializable{
 				iter.remove();
 			}
 		}
-		sess.getTransaction().commit();
 		sess.close();
 		return possessedBooks;
 	}
@@ -202,6 +199,7 @@ public class Book implements Serializable{
 				iter.remove();
 			}
 		}
+		sess.close();
 		return books;
 	}
 	
@@ -216,7 +214,6 @@ public class Book implements Serializable{
 		qry.setParameter("isbn", isbn);
 		@SuppressWarnings("unchecked")
 		List<Book> books = qry.list();
-		sess.getTransaction().commit();
 		sess.close();
 		return books;
 	}
