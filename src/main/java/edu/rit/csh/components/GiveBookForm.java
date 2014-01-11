@@ -17,6 +17,7 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import edu.rit.csh.WicketApplication;
 import edu.rit.csh.auth.LDAPProxy;
 import edu.rit.csh.auth.LDAPUser;
+import edu.rit.csh.auth.UserWebSession;
 import edu.rit.csh.models.Book;
 import edu.rit.csh.pages.HomePage;
 
@@ -34,6 +35,14 @@ public class GiveBookForm extends Form<Book> {
 		
 		List<LDAPUser> users;
 		users = WicketApplication.getWicketApplication().getLDAPProxy().getActiveUsers();
+		String userId = ((UserWebSession)getSession()).getUser().getUidnumber();
+		//remove the authenticated user from the list.
+		for (int i = 0; i < users.size(); i++){
+			if (users.get(i).getUidnumber().equals(userId)){
+				users.remove(i);
+				break;
+			}
+		}
 		titleField = new UserRealNameAutoCompleteTextField("username", users);
 		submitButton = new Button("giveBookSubmit"); 
 		submitButton.add(AttributeModifier.replace("class", "ui blue disabled button"));
