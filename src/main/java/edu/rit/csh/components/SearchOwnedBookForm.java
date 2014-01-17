@@ -1,13 +1,8 @@
 package edu.rit.csh.components;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.ThreadPoolExecutor;
-
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
@@ -19,7 +14,6 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import edu.rit.csh.auth.UserWebSession;
-import edu.rit.csh.WicketApplication;
 import edu.rit.csh.models.Book;
 import edu.rit.csh.models.BookInfo;
 import edu.rit.csh.pages.OwnedBookSearchResultsPage;
