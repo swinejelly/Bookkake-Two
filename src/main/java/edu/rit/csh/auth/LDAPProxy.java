@@ -3,6 +3,7 @@ package edu.rit.csh.auth;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,13 +42,13 @@ public class LDAPProxy {
 	 * @throws IOException 
 	 */
 	public LDAPProxy(String path) throws IOException{
-		BufferedInputStream stream = new BufferedInputStream(
-				new FileInputStream(path));
+		InputStream stream = this.getClass().getResourceAsStream(path);
 		Properties props = new Properties();
 		props.load(stream);
 		this.username = props.getProperty("username");
 		this.password = props.getProperty("password");
 		connection = new LdapNetworkConnection(props.getProperty("host"));
+		stream.close();
 	}
 
 	/**

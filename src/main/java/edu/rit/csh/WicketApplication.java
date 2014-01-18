@@ -3,6 +3,7 @@ package edu.rit.csh;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -65,15 +66,15 @@ public class WicketApplication extends WebApplication
 		
 		//Init ldapProxy
 		try {
-			ldapProxy = new LDAPProxy("ldap.properties");
+			ldapProxy = new LDAPProxy("/ldap.properties");
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(1);
 		}
 		
 		//Init googleBooksAPIkey
-		try (BufferedInputStream stream = new BufferedInputStream(
-				new FileInputStream("googlebooks.properties"))){ 
+		try (InputStream stream = 
+				this.getClass().getResourceAsStream("/googlebooks.properties")){ 
 		Properties props = new Properties();
 		props.load(stream);
 		stream.close();
