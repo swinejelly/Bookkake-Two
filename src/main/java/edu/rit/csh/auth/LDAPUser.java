@@ -27,14 +27,14 @@ public class LDAPUser implements Serializable{
 	private String roomnumber;
 	
 	public LDAPUser(String uid, String givenname, String commonname, boolean onfloor,
-			boolean active, String uidnumber, String roomnmber) {
+			boolean active, String uidnumber, String roomnumber) {
 		this.uid = uid;
 		this.givenname = givenname;
 		this.commonname = commonname;
 		this.onfloor = onfloor;
 		this.active = active;
 		this.uidnumber = uidnumber;
-		this.roomnumber = roomnmber;
+		this.roomnumber = roomnumber;
 	}
 
 	public String getUid() {

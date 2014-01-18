@@ -1,5 +1,7 @@
 package edu.rit.csh.components;
 
+import org.apache.wicket.Application;
+import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
@@ -22,7 +24,14 @@ public class Header extends Panel {
 			}
 		});
 		
-		add(new SwitchUserForm("switchUser"));
+		if (Application.get().usesDevelopmentConfig()){
+			add(new SwitchUserForm("switchUser"));
+		}else{
+			WebComponent wc = new WebComponent("switchUser");
+			wc.setVisibilityAllowed(false);
+			add(wc);
+		}
+		
 	}
 
 	

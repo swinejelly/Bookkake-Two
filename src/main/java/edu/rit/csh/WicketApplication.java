@@ -15,6 +15,7 @@ import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
+import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -94,13 +95,23 @@ public class WicketApplication extends WebApplication
 	@Override
 	public final Session newSession(Request request, Response response){
 		UserWebSession sess = new UserWebSession(request);
-		LDAPUser dummyUser;
+		LDAPUser user = null;;
+		String uidnum;
+		//Get the uidnum
+		if (usesDevelopmentConfig()){
+			uidnum = "10412";
+		}else{
+			WebRequest wRequest = (WebRequest)request;
+			uidnum = wRequest.getHeader("X-WEBAUTH-LDAP-UIDN");
+		}
+		
 		try {
-			dummyUser = getLDAPProxy().getUser("10412");
-			sess.setUser(dummyUser);
-		} catch (LdapException | CursorException e) {
+			user = getLDAPProxy().getUser(uidnum);
+			sess.setUser(user);
+		} catch(LdapException | CursorException e){
 			e.printStackTrace();
 		}
+		sess.setUser(user);
 		return sess;
 	}
 	
