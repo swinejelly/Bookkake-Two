@@ -14,11 +14,11 @@ public class Start {
 
         Server server = new Server();
         SocketConnector connector = new SocketConnector();
+	connector.setPort(9001);
 
         // Set some timeout options to make debugging easier.
         connector.setMaxIdleTime(timeout);
         connector.setSoLingerTime(-1);
-        connector.setPort(8080);
         server.addConnector(connector);
 
         Resource keystore = Resource.newClassPathResource("/keystore");

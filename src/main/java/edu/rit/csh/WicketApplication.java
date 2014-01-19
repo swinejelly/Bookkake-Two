@@ -87,10 +87,6 @@ public class WicketApplication extends WebApplication
 		//init threadExecutor
 		threadExecutor = new ThreadPoolExecutor(2, 8, 
 				30, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(8));
-		
-		PackageResourceReference bgRef = 
-				new PackageResourceReference(getClass(), "background.jpg");
-		mountResource("/assets", bgRef);
 	}
 	
 	@Override
