@@ -61,9 +61,11 @@ public class GiveBookForm extends Form<Book> {
 			e.printStackTrace();
 			return;
 		}
-		String uidnum = recipient.getUidnumber();
-		book.give(uidnum);
-		setResponsePage(HomePage.class);
+		if (recipient != null){
+			String uidnum = recipient.getUidnumber();
+			book.give(uidnum);
+			setResponsePage(HomePage.class);
+		}
 	}
 	
 	
