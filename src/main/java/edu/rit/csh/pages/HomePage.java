@@ -30,6 +30,7 @@ import edu.rit.csh.models.Book;
 
 public class HomePage extends PageTemplate {
 	private static final long serialVersionUID = 1L;
+	private static final String scrollToActionPanelJS = "document.getElementById(\"action\").scrollIntoView();";
 	
 	public HomePage(){
 		super();
@@ -67,6 +68,7 @@ public class HomePage extends PageTemplate {
 				actionTitleAtom.get().replaceWith(l);
 				actionTitleAtom.set(l);
 				target.add(l);
+				target.appendJavaScript(scrollToActionPanelJS);
 			}
 		});
 		
@@ -88,6 +90,7 @@ public class HomePage extends PageTemplate {
 				actionTitleAtom.get().replaceWith(l);
 				actionTitleAtom.set(l);
 				target.add(l);
+				target.appendJavaScript(scrollToActionPanelJS);
 			}
 		});
 		
@@ -161,6 +164,7 @@ public class HomePage extends PageTemplate {
 						actionTitleAtom.set(giveLabel);
 						
 						target.add(givePanel, giveLabel);
+						target.appendJavaScript(scrollToActionPanelJS);
 					}
 				};
 				giveLink.setModel(item.getModel());
@@ -193,6 +197,7 @@ public class HomePage extends PageTemplate {
 							actionTitleAtom.set(uploadLabel);
 
 							target.add(actionAtom.get(), actionTitleAtom.get());
+							target.appendJavaScript(scrollToActionPanelJS);
 						}
 					};
 					uploadLink.setModel(item.getModel());

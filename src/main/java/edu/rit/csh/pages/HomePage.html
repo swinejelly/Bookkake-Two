@@ -9,7 +9,11 @@
 				<div class="one wide column"></div>
 				<div class="fourteen wide column">
 					<div class="ui raised blue segment">
-						<h1 class="ui header">Welcome to Bookkake!</h1>
+						<h1 class="ui header">
+							Welcome to Bookkake!
+							<a wicket:id="searchBookLink" class="ui blue button right attached" style="float: right;">Borrow/Download Book</a>
+							<a wicket:id="addBookLink" class="ui green button left attached" style="float: right;">Add Book</a>
+						</h1>
 					</div>
 				</div>
 			</div>
@@ -53,12 +57,11 @@
 								</td>
 							</tr>
 						</table>		    
-						<a wicket:id="addBookLink" class="ui green button">Add Book</a>
-						<a wicket:id="searchBookLink" class="ui orange button">Borrow/Download Book</a>
 				    </div>
 			    </div>
 			    <div class="five wide column">
-			    	<div class="ui segment">
+			    	<!-- the id is so buttons can #href scroll to this element when it changes. -->
+			    	<div class="ui segment" id="action">
 						<h2 wicket:id="actionTitle" class="ui center aligned header"></h2>
 						<div wicket:id="action">
 						
