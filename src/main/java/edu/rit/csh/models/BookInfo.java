@@ -10,6 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.hibernate.Session;
@@ -38,6 +39,7 @@ public class BookInfo implements Serializable{
 	private String thumbnailURL = "";
 	private String authors = "";
 	private List<Book> books;
+	private BookRequest bookRequest;
 	
 	private BookInfo(){}
 	
@@ -222,6 +224,15 @@ public class BookInfo implements Serializable{
 		this.books = books;
 	}
 	
+	@OneToOne(optional = true, mappedBy="bookInfo")
+	public BookRequest getBookRequest() {
+		return bookRequest;
+	}
+
+	public void setBookRequest(BookRequest bookRequest) {
+		this.bookRequest = bookRequest;
+	}
+
 	@Override
 	public boolean equals(Object o){
 		if (o instanceof BookInfo && ((BookInfo)o).getIsbn().equals(isbn)){

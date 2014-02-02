@@ -9,14 +9,48 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.repeater.RepeatingView;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+
 import edu.rit.csh.auth.UserWebSession;
+import edu.rit.csh.components.BookActionFactory;
+import edu.rit.csh.components.RequestBookPanel;
 import edu.rit.csh.models.Book;
 import edu.rit.csh.models.BookInfo;
 
 public class PublicSearchResultsPage extends PageTemplate {
 	private static final long serialVersionUID = 1L;
+	
+	public class AddBookActionFactory implements BookActionFactory{
+		@Override
+		public RepeatingView getActions(String id, final BookInfo b) {
+			RepeatingView actions = new RepeatingView(id);
+			Form<Void> addBook = new Form<Void>(actions.newChildId()){
+				private static final long serialVersionUID = 1L;
+				@Override
+				protected void onSubmit(){
+					super.onSubmit();
+					setResponsePage(HomePage.class);
+					//Create and persist book.
+					UserWebSession session = (UserWebSession)Session.get();
+					Book.createBook(b.getIsbn(), session.getUser().getUidnumber());
+				}
+			};
+			actions.add(addBook);
+			return actions;
+		}
+	}
+	
+	public class RequestBookActionFactory implements BookActionFactory{
+		@Override
+		public RepeatingView getActions(String id, final BookInfo b) {
+			RepeatingView actions = new RepeatingView(id);
+			actions.add(new RequestBookPanel(actions.newChildId(), Model.of(b)));
+			return actions;
+		}
+	}
 
 	public PublicSearchResultsPage() {
 		super();
@@ -26,6 +60,16 @@ public class PublicSearchResultsPage extends PageTemplate {
 		super();
 		String title  = params.get("title").toString();
 		String author = params.get("author").toString();
+		String type   = params.get("action").toString();
+		final BookActionFactory actionFact;
+		switch(type){
+		case "request":
+			actionFact = new RequestBookActionFactory();
+			break;
+		case "add":
+		default:
+			actionFact = new AddBookActionFactory();
+		}
 		
 		List<BookInfo> books = BookInfo.searchBooks(title, author, 10);
 		if (books.isEmpty()){
@@ -46,21 +90,8 @@ public class PublicSearchResultsPage extends PageTemplate {
 					img.add(AttributeModifier.replace("src", 
 							new PropertyModel<BookInfo>(item.getModel(), "thumbnailURL")));
 					item.add(img);
-					//Add Book button
-					final String isbn = item.getModelObject().getIsbn();
-
-					Form<Void> addBook = new Form<Void>("actions"){
-						private static final long serialVersionUID = 1L;
-						@Override
-						protected void onSubmit(){
-							super.onSubmit();
-							setResponsePage(HomePage.class);
-							//Create and persist book.
-							UserWebSession session = (UserWebSession)Session.get();
-							Book.createBook(isbn, session.getUser().getUidnumber());
-						}
-					};
-					item.add(addBook);
+					//Add Book Actions
+					item.add(actionFact.getActions("actions", item.getModelObject()));
 				}
 
 				@Override

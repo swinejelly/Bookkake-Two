@@ -55,7 +55,7 @@ public class HomePage extends PageTemplate {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				//construct the new SearchBookPanel
-				WebMarkupContainer actionPanel = new SearchBookPanel(actionAtom.get().getId());
+				WebMarkupContainer actionPanel = new SearchBookPanel(actionAtom.get().getId(), "add");
 				actionPanel.setOutputMarkupId(true);
 				//Replace it in the page hierarchy
 				actionAtom.get().replaceWith(actionPanel);

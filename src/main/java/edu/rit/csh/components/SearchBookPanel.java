@@ -7,9 +7,9 @@ public class SearchBookPanel extends Panel {
 	
 	private final SearchBookForm form;
 
-	public SearchBookPanel(String id) {
+	public SearchBookPanel(String id, String action) {
 		super(id);
-		form = new SearchBookForm("searchBookForm");
+		form = new SearchBookForm("searchBookForm", action);
 		add(form);
 	}
 

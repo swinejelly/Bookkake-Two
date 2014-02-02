@@ -10,6 +10,7 @@ import org.apache.wicket.model.PropertyModel;
 
 import edu.rit.csh.auth.UserWebSession;
 import edu.rit.csh.pages.HomePage;
+import edu.rit.csh.pages.RequestPage;
 
 public class Header extends Panel {
 	private static final long serialVersionUID = 1L;
@@ -21,6 +22,14 @@ public class Header extends Panel {
 			@Override
 			public void onClick(){
 				setResponsePage(HomePage.class);
+			}
+		});
+		
+		add(new Link<Void>("requestsLink"){
+			private static final long serialVersionUID = 1L;
+			@Override
+			public void onClick(){
+				setResponsePage(RequestPage.class);
 			}
 		});
 		

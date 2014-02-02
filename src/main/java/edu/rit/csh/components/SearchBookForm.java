@@ -18,11 +18,13 @@ import edu.rit.csh.pages.PublicSearchResultsPage;
 public class SearchBookForm extends Form<SearchBookForm> {
 	private static final long serialVersionUID = 1L;
 	
+	private String action;
 	private String title;
 	private String author;
 
-	public SearchBookForm(String id) {
+	public SearchBookForm(String id, String action) {
 		super(id);
+		this.action = action;
 		setDefaultModel(new CompoundPropertyModel<SearchBookForm>(this));
 		
 		TextField<String> title = new TextField<>("title");
@@ -42,6 +44,7 @@ public class SearchBookForm extends Form<SearchBookForm> {
 	public void onSubmit(){
 		PageParameters params = new PageParameters();
 		params.add("title", title);
+		params.add("action", action);
 		if (author != null){
 			params.add("author", author);
 		}

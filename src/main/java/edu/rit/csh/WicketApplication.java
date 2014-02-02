@@ -1,7 +1,5 @@
 package edu.rit.csh;
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -17,7 +15,6 @@ import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
 import org.apache.wicket.request.http.WebRequest;
-import org.apache.wicket.request.resource.PackageResourceReference;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
@@ -27,6 +24,7 @@ import edu.rit.csh.auth.UserWebSession;
 import edu.rit.csh.googlebooks.GoogleBookAPIQuery;
 import edu.rit.csh.models.Book;
 import edu.rit.csh.models.BookInfo;
+import edu.rit.csh.models.BookRequest;
 import edu.rit.csh.models.BorrowPeriod;
 import edu.rit.csh.pages.HomePage;
 
@@ -62,6 +60,7 @@ public class WicketApplication extends WebApplication
 		sessionFactory = new Configuration().configure().buildSessionFactory();
 		Book.setSessFact(sessionFactory);
 		BookInfo.setSessFact(sessionFactory);
+		BookRequest.setSessFact(sessionFactory);
 		BorrowPeriod.setSessFact(sessionFactory);
 		
 		//Init ldapProxy

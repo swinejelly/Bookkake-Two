@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+	<header>
+	</header>
+	<body>
+		<wicket:extend>
+			<br>
+			<div class="ui segment">
+			<h1>Current requests</h1>
+			<table class="ui four column table segment">
+				<thead>
+					<tr>
+						<th class="four wide">Thumbnail</th>
+						<th class="five wide">Title</th>
+						<th class="four wide">Requesting User</th>
+						<th class="three wide">User wants until</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr wicket:id="bookRequest">
+						<td><img wicket:id="thumbnail"></img></td>
+						<td wicket:id="title"></td>
+						<td wicket:id="requester"></td>
+						<td wicket:id="end"></td>
+					</tr>
+				</tbody>
+				<tfoot>
+					<tr>
+						<th colspan="4">
+							<h2>Add a request</h2>
+							<p>Make a request to borrow a book. If someone else has the book,
+							they can see that you want the book and lend it to you.</p>
+							<div wicket:id="requestBookPanel">
+								<i class="book icon"></i>Make Request
+							</div>
+						</th>
+					</tr>
+				</tfoot>
+			</table>
+			</div>
+		</wicket:extend>
+	</body>
+</html>
