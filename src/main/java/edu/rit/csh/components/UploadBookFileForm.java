@@ -4,22 +4,21 @@ import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.form.upload.FileUploadField;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.util.lang.Bytes;
 
 import edu.rit.csh.models.Book;
 import edu.rit.csh.pages.HomePage;
 
-public class UploadBookFileForm extends Form<Void> {
+public class UploadBookFileForm extends Form<Book> {
 	private static final long serialVersionUID = 1L;
 	private final Button submitButton;
 	private final FileUploadField fileField;
-	private Book book;
 
-	public UploadBookFileForm(String id, Book book){
-		super(id);
+	public UploadBookFileForm(String id, IModel<Book> model){
+		super(id, model);
 		setMultiPart(true);
 		setMaxSize(Bytes.gigabytes(1L));
-		this.book = book;
 		
 		submitButton = new Button("uploadFileSubmit"); 
 		
@@ -32,7 +31,7 @@ public class UploadBookFileForm extends Form<Void> {
 	@Override
 	public void onSubmit(){
 		FileUpload upload = fileField.getFileUpload();
-		book.upload(upload.getClientFileName(), upload.getBytes());
+		getModelObject().upload(upload.getClientFileName(), upload.getBytes());
 		setResponsePage(HomePage.class);
 	}
 }

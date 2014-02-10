@@ -26,6 +26,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import edu.rit.csh.auth.LDAPUser;
 import edu.rit.csh.auth.UserWebSession;
+import edu.rit.csh.components.ImagePanel;
 import edu.rit.csh.components.ReturnDatePicker;
 import edu.rit.csh.models.Book;
 import edu.rit.csh.models.BookInfo;
@@ -48,17 +49,13 @@ public class OwnedBookSearchResultsPage extends PageTemplate {
 		add(new Label("authors", new PropertyModel<Object>(info, "authors")));
 		add(new Label("description", new PropertyModel<Object>(info, "description")));
 		
-		WebMarkupContainer img = new WebMarkupContainer("img");
-		img.add(AttributeModifier.replace("src",
-			new PropertyModel<Object>(info, "thumbnailURL")));
-		add(img);
+		add(new ImagePanel("img", info.getThumbnailURL()));
 		
 		List<Book> activeBooks = Book.getBooksByIsbn(isbn);
 		final Map<String, LDAPUser> users = new TreeMap<>();
 		for (Book b: activeBooks){
 			if (!users.containsKey(b.getOwnerUID())){
-				LDAPUser user = b.getOwner();
-				users.put(b.getOwnerUID(), user);
+				users.put(b.getOwnerUID(), b.owner);
 			}
 		}
 		final LDAPUser user = ((UserWebSession)this.getSession()).getUser();

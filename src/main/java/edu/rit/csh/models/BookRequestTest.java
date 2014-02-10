@@ -4,6 +4,9 @@ import static org.junit.Assert.*;
 
 import java.util.Calendar;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -15,26 +18,13 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class BookRequestTest {	
-	private static SessionFactory sessFact;
+import edu.rit.csh.Resources;
 
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		sessFact = new Configuration().configure().buildSessionFactory();
-		Book.setSessFact(sessFact);
-		BookInfo.setSessFact(sessFact);
-		BorrowPeriod.setSessFact(sessFact);
-		BookRequest.setSessFact(sessFact);
-	}
-	
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-		sessFact.close();
-	}
+public class BookRequestTest {	
 	
 	@After
 	public void cleanTest(){
-		Session sess = sessFact.openSession();
+		Session sess = Resources.sessionFactory.openSession();
 		sess.beginTransaction();
 		Query qry = sess.createQuery("delete from Book");
 		qry.executeUpdate();
@@ -59,7 +49,7 @@ public class BookRequestTest {
 		//War of the Worlds
 		BookRequest.createBookRequest("9781604502442", "10413", Calendar.getInstance());
 		
-		Session session = sessFact.openSession();
+		Session session = Resources.sessionFactory.openSession();
 		session.beginTransaction();
 		@SuppressWarnings("unchecked")
 		List<BookRequest> results = session.createQuery("from BookRequest").list();

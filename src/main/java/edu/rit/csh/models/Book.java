@@ -11,6 +11,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -18,31 +24,31 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
+import javax.persistence.PostLoad;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.wicket.markup.html.link.DownloadLink;
+import org.hibernate.CallbackException;
+import org.hibernate.EmptyInterceptor;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.classic.Lifecycle;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import edu.rit.csh.Resources;
 import edu.rit.csh.WicketApplication;
 import edu.rit.csh.auth.LDAPUser;
 
 @Entity
 @Table(name = "BOOKS")
-public class Book implements Serializable{
+public class Book implements Serializable, Lifecycle{
 	private static final long serialVersionUID = 1L;
-	
-	private static SessionFactory sessFact;
-	public static void setSessFact(SessionFactory fact){
-		sessFact = fact;
-	}
 	
 	private static String filePath = "";
 
@@ -59,6 +65,9 @@ public class Book implements Serializable{
 	private String isbn;
 	
 	private String ownerUID;
+	
+	@Transient
+	public LDAPUser owner;
 	
 	private BorrowPeriod borrowPeriod;
 	
@@ -88,7 +97,7 @@ public class Book implements Serializable{
 	 * @return A book if found, else null.
 	 */
 	public static Book getBook(String isbn, String ownerUID){
-		Session sess = sessFact.openSession();
+		Session sess = Resources.sessionFactory.openSession();
 		sess.beginTransaction();
 		Query qry = sess.createQuery("from Book where isbn = :isbn and ownerUID = :uid");
 		qry.setParameter("isbn", isbn);
@@ -104,7 +113,7 @@ public class Book implements Serializable{
 	 * @param ownerUID LDAP UID of the user.
 	 */
 	public static Book createBook(String isbn, String ownerUID){
-		Session sess = sessFact.openSession();
+		Session sess = Resources.sessionFactory.openSession();
 		sess.beginTransaction();
 		Book b = new Book(isbn, ownerUID);
 		sess.save(b);
@@ -120,7 +129,7 @@ public class Book implements Serializable{
 	 * @return list of all books owned (regardless of possession) by the user.
 	 */
 	public static List<Book> getOwnedBooks(String ownerUID){
-		Session sess = sessFact.openSession();
+		Session sess = Resources.sessionFactory.openSession();
 		sess.beginTransaction();
 		Query qry = sess.createQuery("from Book where ownerUID = :uid and active = true");
 		qry.setParameter("uid", ownerUID);
@@ -145,7 +154,7 @@ public class Book implements Serializable{
 	 * @return list of all books possessed by user.
 	 */
 	public static List<Book> getPossessedBooks(String possessorUID, Calendar when){
-		Session sess = sessFact.openSession();
+		Session sess = Resources.sessionFactory.openSession();
 		sess.beginTransaction();
 		//List<Book> possessedBooks = getPossessedBooks(sess, when, possessorUID);
 		Query qry = sess.createQuery("from Book where (ownerUID = :uid or borrowPeriod != null) and active = true");
@@ -185,7 +194,7 @@ public class Book implements Serializable{
 	 */
 	@SuppressWarnings("unchecked")
 	public static List<Book> getUnpossessedBooks(String possessorUID){
-		Session sess = sessFact.openSession();
+		Session sess = Resources.sessionFactory.openSession();
 		sess.beginTransaction();
 		
 		Query qry = sess.createQuery("from Book where ownerUID != :uid and active = true");
@@ -208,7 +217,7 @@ public class Book implements Serializable{
 	 * @return all active books that have isbn isbn
 	 */
 	public static List<Book> getBooksByIsbn(String isbn){
-		Session sess = sessFact.openSession();
+		Session sess = Resources.sessionFactory.openSession();
 		sess.beginTransaction();
 		Query qry = sess.createQuery("from Book where isbn = :isbn and active = true");
 		qry.setParameter("isbn", isbn);
@@ -223,7 +232,7 @@ public class Book implements Serializable{
 	 * in the application.
 	 */
 	public void delete(){
-		Session sess = sessFact.openSession();
+		Session sess = Resources.sessionFactory.openSession();
 		sess.beginTransaction();
 		sess.update(this);
 		setActive(false);
@@ -235,7 +244,7 @@ public class Book implements Serializable{
 	 * borrowerUID borrows a book from begin to end.
 	 */
 	public void borrow(String borrowerUID, Calendar begin, Calendar end){
-		Session sess = sessFact.openSession();
+		Session sess = Resources.sessionFactory.openSession();
 		sess.beginTransaction();
 		sess.update(this);
 		borrowPeriod = new BorrowPeriod();
@@ -249,7 +258,7 @@ public class Book implements Serializable{
 	}
 	
 	public void removeBorrow(){
-		Session sess = sessFact.openSession();
+		Session sess = Resources.sessionFactory.openSession();
 		sess.beginTransaction();
 		sess.update(this);
 		if (borrowPeriod != null){
@@ -266,7 +275,7 @@ public class Book implements Serializable{
 		//it properly
 		removeBorrow();
 		
-		Session sess = sessFact.openSession();
+		Session sess = Resources.sessionFactory.openSession();
 		sess.beginTransaction();
 		sess.update(this);
 		ownerUID = newOwner;
@@ -288,7 +297,7 @@ public class Book implements Serializable{
 		
 		String destStr = UUID.randomUUID().toString() + fileName;
 		destination = new File(destStr);
-		Session sess = sessFact.openSession();
+		Session sess = Resources.sessionFactory.openSession();
 		sess.beginTransaction();
 		sess.update(this);
 		relPath = destStr;
@@ -307,7 +316,7 @@ public class Book implements Serializable{
 				} catch (IOException e) {
 					e.printStackTrace();
 					destination.delete();
-					Session sess = sessFact.openSession();
+					Session sess = Resources.sessionFactory.openSession();
 					sess.beginTransaction();
 					sess.update(Book.this);
 					relPath = null;
@@ -316,7 +325,7 @@ public class Book implements Serializable{
 					sess.close();
 					return;
 				}
-				Session sess = sessFact.openSession();
+				Session sess = Resources.sessionFactory.openSession();
 				sess.beginTransaction();
 				sess.update(Book.this);
 				isUploaded = true;
@@ -326,8 +335,7 @@ public class Book implements Serializable{
 			}
 		};
 		
-		WicketApplication.getWicketApplication().getThreadExecutor().execute(uploadTask);
-		
+		Resources.threadExecutor.execute(uploadTask);
 	}
 	
 	@Id
@@ -377,27 +385,6 @@ public class Book implements Serializable{
 	}
 
 	/**
-	 * Automatically gets the owner using a LDAP connection
-	 * to CSH's LDAP server.
-	 * @return the LDAPUser if successful, else null.
-	 */
-	@Transient
-	public LDAPUser getOwner(){
-		try {
-			return WicketApplication.getWicketApplication().getLDAPProxy().getUser(ownerUID);
-		} catch (LdapException | CursorException e) {
-			return null;
-		}
-	}
-	
-	/**
-	 * Set the new owner of this book to newOwner
-	 */
-	public void setOwner(LDAPUser newOwner){
-		ownerUID = newOwner.getUidnumber();
-	}
-	
-	/**
 	 * Returns the possessor of the Book on date using a connection to
 	 * CSH's LDAP server.
 	 * @return the possessing LDAPUser if successful, else null
@@ -405,12 +392,10 @@ public class Book implements Serializable{
 	@Transient
 	public LDAPUser getPossessor(Calendar date){
 		try{
-			if (borrowPeriod == null){
-				return getOwner();
-			}else if (borrowPeriod.overlaps(date)){
-				return WicketApplication.getWicketApplication().getLDAPProxy().getUser(borrowPeriod.getBorrowerUID());
+			if (borrowPeriod != null && borrowPeriod.overlaps(date)){
+				return Resources.ldapProxy.getUser(borrowPeriod.getBorrowerUID());
 			}else{
-				return getOwner();
+				return owner;
 			}
 		} catch (LdapException | CursorException e) {
 			return null;
@@ -526,5 +511,34 @@ public class Book implements Serializable{
 			}
 		}
 		return model;
+	}
+
+	@Override
+	public boolean onSave(Session s) throws CallbackException {
+		return false;
+	}
+
+	@Override
+	public boolean onUpdate(Session s) throws CallbackException {
+		return false;
+	}
+
+	@Override
+	public boolean onDelete(Session s) throws CallbackException {
+		return false;
+	}
+
+	@Override
+	public void onLoad(Session s, Serializable id) {
+		Callable<LDAPUser> future = new Callable<LDAPUser>(){
+			public LDAPUser call() throws Exception {
+				return Resources.ldapProxy.getUser(ownerUID);
+			}
+		};
+		try {
+			owner = Resources.threadExecutor.submit(future).get(2, TimeUnit.SECONDS);
+		} catch (InterruptedException | ExecutionException | TimeoutException e) {
+			e.printStackTrace();
+		}
 	}
 }

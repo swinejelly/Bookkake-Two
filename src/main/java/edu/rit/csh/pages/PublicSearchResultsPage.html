@@ -3,6 +3,12 @@
 	<header>
 	</header>
 	<body>
+	<wicket:fragment wicket:id="add">
+		<form wicket:id="addForm" id="actions" method="post">
+			<input type="submit" name="addBook" value="Add Book!"
+				class="ui blue submit button">
+		</form>
+	</wicket:fragment>
 		<wicket:extend>
 			<br>
 			<div class="ui segment">
@@ -31,11 +37,6 @@
 							</td>
 							<td>
 								<div wicket:id="actions"></div>
-								<!-- form wicket:id="actions" id="actions" method="post">
-									
-									<input type="submit" name="addBook" value="Add Book!" 
-										class="ui blue submit button">
-								</form> -->
 							</td>
 						</tr>
 					</tbody>

@@ -1,26 +1,30 @@
 package edu.rit.csh.pages;
 
-import java.util.Calendar;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.exception.LdapException;
+import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel;
-import org.apache.wicket.markup.html.WebComponent;
+import org.apache.wicket.extensions.markup.html.repeater.data.grid.DataGridView;
+import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
+import org.apache.wicket.extensions.markup.html.repeater.data.grid.PropertyPopulator;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.DownloadLink;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.markup.repeater.Item;
+import org.apache.wicket.markup.repeater.RepeatingView;
+import org.apache.wicket.markup.repeater.data.ListDataProvider;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 
-import edu.rit.csh.auth.LDAPUser;
 import edu.rit.csh.auth.UserWebSession;
 import edu.rit.csh.components.GiveBookPanel;
 import edu.rit.csh.components.SearchBookPanel;
@@ -32,65 +36,30 @@ public class HomePage extends PageTemplate {
 	private static final long serialVersionUID = 1L;
 	private static final String scrollToActionPanelJS = "document.getElementById(\"action\").scrollIntoView();";
 	
+	private WebMarkupContainer action = new WebMarkupContainer("action");
+	
 	public HomePage(){
 		super();
-		final AtomicReference<WebMarkupContainer> actionAtom = new AtomicReference<>(
-				new WebMarkupContainer("action")
-		);
-				
-		actionAtom.get().setOutputMarkupId(true);
-		add(actionAtom.get());
+	
+		action.setOutputMarkupId(true);
+		add(action);
 		
-		final AtomicReference<Label> actionTitleAtom = new AtomicReference<>(
-				new Label("actionTitle", "Action")
-		);
-		actionTitleAtom.get().setOutputMarkupId(true);
-		add(actionTitleAtom.get());
 		/**
 		 * Link to add a book.
 		 */
 		add(new AjaxLink<Void>("addBookLink"){
 			private static final long serialVersionUID = 1L;
-
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				//construct the new SearchBookPanel
-				WebMarkupContainer actionPanel = new SearchBookPanel(actionAtom.get().getId(), "add");
-				actionPanel.setOutputMarkupId(true);
-				//Replace it in the page hierarchy
-				actionAtom.get().replaceWith(actionPanel);
-				actionAtom.set(actionPanel);
-				//Communicate change to client
-				target.add(actionPanel);
-				//replace actionTitle
-				Label l = new Label(actionTitleAtom.get().getId(), "Add Book");
-				l.setOutputMarkupId(true);
-				actionTitleAtom.get().replaceWith(l);
-				actionTitleAtom.set(l);
-				target.add(l);
-				target.appendJavaScript(scrollToActionPanelJS);
+				showAddPanel(target);
 			}
 		});
 		
 		add(new AjaxLink<Void>("searchBookLink"){
 			private static final long serialVersionUID = 1L;
-
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				//Construct SearchOwnedBookPanel
-				WebMarkupContainer actionPanel = new SearchOwnedBookPanel(actionAtom.get().getId());
-				actionPanel.setOutputMarkupId(true);
-				//replace
-				actionAtom.get().replaceWith(actionPanel);
-				actionAtom.set(actionPanel);
-				//return panel to client.
-				target.add(actionPanel);
-				Label l = new Label(actionTitleAtom.get().getId(), "Borrow Book");
-				l.setOutputMarkupId(true);
-				actionTitleAtom.get().replaceWith(l);
-				actionTitleAtom.set(l);
-				target.add(l);
-				target.appendJavaScript(scrollToActionPanelJS);
+				showBorrowPanel(target);
 			}
 		});
 		
@@ -114,179 +83,192 @@ public class HomePage extends PageTemplate {
 		final List<Book> userBorrowedBooks = new LinkedList<Book>(userPossessedBooks);
 		userBorrowedBooks.removeAll(userOwnedBooks);
 		
-		final ListView<Book> ownedPossessedBooksView = 
-		new ListView<Book>("ownedPossessedBooks", userOwnedPossessedBooks){
+		List<ICellPopulator<Book>> ownedPossessedColumns = new ArrayList<>();
+		ownedPossessedColumns.add(new PropertyPopulator<Book>("bookInfo.title"));
+		//Blank column
+		ownedPossessedColumns.add(new ICellPopulator<Book>(){
 			private static final long serialVersionUID = 1L;
-
 			@Override
-			protected void populateItem(final ListItem<Book> item) {
-				//Add title
-				item.add(new Label("title", new PropertyModel<Book>(item.getModel(), "bookInfo.title")));
-				
-				//Add link to delete book
-				AjaxFallbackLink<Book> deleteLink = new AjaxFallbackLink<Book>("delete"){
-					private static final long serialVersionUID = 1L;
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						getModelObject().delete();
-						setResponsePage(HomePage.class);
-					}
-				}; 
-				deleteLink.setModel(item.getModel());
-				item.add(deleteLink);
-				
-				AjaxFallbackLink<Book> giveLink = new AjaxFallbackLink<Book>("give"){
-					private static final long serialVersionUID = 1L;
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						final Book b = getModelObject();
-						AjaxLazyLoadPanel givePanel = null;
-						givePanel = new AjaxLazyLoadPanel(actionAtom.get().getId()) {
-							private static final long serialVersionUID = 1L;
-
-							@Override
-							public Component getLazyLoadComponent(String markupId) {
-								try {
-									return new GiveBookPanel(markupId, b);
-								} catch (LdapException | CursorException e) {
-									e.printStackTrace();
-									return new Label(markupId, "Could not retrieve usernames.");
-								}
-							}
-						};
-						givePanel.setOutputMarkupId(true);
-						actionAtom.get().replaceWith(givePanel);
-						actionAtom.set(givePanel);
+			public void detach() {}
+			@Override
+			public void populateItem(Item<ICellPopulator<Book>> cellItem,
+					String componentId, IModel<Book> rowModel) {
+				cellItem.add(new Label(componentId, ""));
+			}
+		});
+		//Action column
+		ownedPossessedColumns.add(new OwnedPossessedBookActionPopulator());
+		
+		add(new DataGridView<Book>("rows1", ownedPossessedColumns, new ListDataProvider<Book>(userOwnedPossessedBooks)));
+		
+		List<ICellPopulator<Book>> borrowedBooksColumns = new ArrayList<>();
+		borrowedBooksColumns.add(new PropertyPopulator<Book>("bookInfo.title"));
+		borrowedBooksColumns.add(new ICellPopulator<Book>() {
+			private static final long serialVersionUID = 1L;
+			@Override
+			public void detach() {}
+			@Override
+			public void populateItem(Item<ICellPopulator<Book>> cellItem,
+					String componentId, IModel<Book> rowModel) {
+				String text = String.format("Borrowed from %s: due on %s",
+						rowModel.getObject().owner.getUid(),
+						new SimpleDateFormat("MM/dd/yyyy").format(rowModel.getObject().getBorrowPeriod().getEnd().getTime()));
 						
-						Label giveLabel = new Label(actionTitleAtom.get().getId(), "Give Book");
-						giveLabel.setOutputMarkupId(true);
-						actionTitleAtom.get().replaceWith(giveLabel);
-						actionTitleAtom.set(giveLabel);
-						
-						target.add(givePanel, giveLabel);
-						target.appendJavaScript(scrollToActionPanelJS);
-					}
-				};
-				giveLink.setModel(item.getModel());
-				item.add(giveLink);
-				
-				WebComponent ivUpload = new WebComponent("upload"),
-						     ivUploading = new WebComponent("uploading"),
-						     ivDownload = new WebComponent("download");
-				//These invisible components will be used to fill in the unused components.
-				ivUpload.setVisible(false);
-				ivUploading.setVisible(false);
-				ivDownload.setVisible(false);
-				//Components for file upload status.
-				if (!item.getModelObject().isUploaded() && item.getModelObject().getRelPath() == null){
-					//Item has no file.
-					AjaxFallbackLink<Book> uploadLink = new AjaxFallbackLink<Book>("upload") {
-						private static final long serialVersionUID = 1L;
-
-						@Override
-						public void onClick(AjaxRequestTarget target) {
-							UploadBookFilePanel uploadPanel = new UploadBookFilePanel("action", getModelObject());
-							uploadPanel.setOutputMarkupId(true);
-							String labelStr = "Upload \"" + getModelObject().getBookInfo().getTitle() +	"\"";
-							Label uploadLabel = new Label("actionTitle", labelStr);
-							uploadLabel.setOutputMarkupId(true);
-
-							actionAtom.get().replaceWith(uploadPanel);
-							actionAtom.set(uploadPanel);
-							actionTitleAtom.get().replaceWith(uploadLabel);
-							actionTitleAtom.set(uploadLabel);
-
-							target.add(actionAtom.get(), actionTitleAtom.get());
-							target.appendJavaScript(scrollToActionPanelJS);
-						}
-					};
-					uploadLink.setModel(item.getModel());
-					item.add(uploadLink);
-					
-					item.add(ivUploading);
-					item.add(ivDownload);
-				}else if (!item.getModelObject().isUploaded()){
-					//Item's file is currently uploading.
-					WebMarkupContainer uploadingButton = new WebMarkupContainer("uploading");
-					item.add(uploadingButton);
-					
-					item.add(ivUpload);
-					item.add(ivDownload);
-				}else{
-					//Item's file is uploaded.
-					DownloadLink dl;
-					if ((dl = item.getModelObject().makeDownloadLink("download")) != null){
-						item.add(dl);
-					}else{
-						item.add(ivDownload);
-					}
-					
-					item.add(ivUpload);
-					item.add(ivUploading);
+				cellItem.add(new Label(componentId, text));
+			}
+		});
+		borrowedBooksColumns.add(new ReturnBookPopulator());
+		add(new DataGridView<Book>("rows2", borrowedBooksColumns, new ListDataProvider<Book>(userBorrowedBooks)));
+		
+		ArrayList<ICellPopulator<Book>> lentColumns = new ArrayList<>();
+		lentColumns.add(new PropertyPopulator<Book>("bookInfo.title"));
+		lentColumns.add(new ICellPopulator<Book>(){
+			private static final long serialVersionUID = 1L;
+			@Override
+			public void detach() {
+			}
+			@Override
+			public void populateItem(Item<ICellPopulator<Book>> cellItem,
+					String componentId, IModel<Book> rowModel) {
+				String text = String.format("Borrowed by %s: due on %s", 
+						rowModel.getObject().owner.getUid(),
+						new SimpleDateFormat("MM/dd/yyyy").format(rowModel.getObject().getBorrowPeriod().getEnd().getTime()));
+				cellItem.add(new Label(componentId, text));
+			}
+		});
+		lentColumns.add(new ReturnBookPopulator());
+		add(new DataGridView<Book>("rows3", lentColumns, new ListDataProvider<Book>(userBorrowedBooks)));
+	}
+	
+	private void showAddPanel(AjaxRequestTarget target){
+		replaceAction(target, new SearchBookPanel(action.getId(), "add"));
+	}
+	
+	private void showBorrowPanel(AjaxRequestTarget target){
+		replaceAction(target, new SearchOwnedBookPanel(action.getId()));
+	}
+	
+	private void showGivePanel(AjaxRequestTarget target, final Book b){
+		WebMarkupContainer givePanel = new AjaxLazyLoadPanel(action.getId()) {
+			private static final long serialVersionUID = 1L;
+			@Override
+			public Component getLazyLoadComponent(String markupId) {
+				try {
+					return new GiveBookPanel(markupId, b);
+				} catch (LdapException | CursorException e) {
+					e.printStackTrace();
+					return new Label(markupId, "Could not retrieve usernames.");
 				}
 			}
 		};
-		ownedPossessedBooksView.setOutputMarkupId(true);
-		add(ownedPossessedBooksView);
-		
-		final ListView<Book> borrowedBooksView =
-		new ListView<Book>("borrowedBooks", userBorrowedBooks){
-			private static final long serialVersionUID = 1L;
+		replaceAction(target, givePanel);
+	}
+	
+	private void showUploadPanel(AjaxRequestTarget target, IModel<Book> model){
+		replaceAction(target, new UploadBookFilePanel(action.getId(), model));
+	}
+	
+	/**
+	 * Replace the action panel on the page.
+	 * @param newAction the panel to replace the action panel.
+	 * @param title The new title for the panel.
+	 */
+	private void replaceAction(AjaxRequestTarget target, WebMarkupContainer newAction){
+		newAction.setOutputMarkupId(true);
+		//Replace it in the page hierarchy
+		action.replaceWith(newAction);
+		action = newAction;
+		//Communicate change to client
+		target.add(newAction);
+		target.appendJavaScript(scrollToActionPanelJS);
+	}
+	
+	private class OwnedPossessedBookActionPopulator implements ICellPopulator<Book>{
+		private static final long serialVersionUID = 1L;
 
-			@Override
-			protected void populateItem(final ListItem<Book> item) {
-				//add title
-				item.add(new Label("title", new PropertyModel<Book>(item.getModel(), "bookInfo.title")));
-				//Add who the borrower is
-				
-				LDAPUser borrower = item.getModelObject().getOwner();
-				item.add(new Label("lender", new PropertyModel<LDAPUser>(borrower, "uid")));
-				//Add link to return book to other user.
-				AjaxFallbackLink<Book> returnLink = new AjaxFallbackLink<Book>("return"){
+		@Override
+		public void detach() {}
+
+		@Override
+		public void populateItem(Item<ICellPopulator<Book>> cellItem,
+				String componentId, IModel<Book> rowModel) {
+			AttributeModifier red   = AttributeModifier.replace("class", "mini red ui button"),
+					          blue  = AttributeModifier.replace("class", "mini blue ui button"),
+					          white = AttributeModifier.replace("class", "mini white ui button");
+			
+			RepeatingView v = new RepeatingView(componentId, rowModel);
+			AjaxFallbackLink<Book> delete = new AjaxFallbackLink<Book>(v.newChildId(), rowModel){
+				private static final long serialVersionUID = 1L;
+				@Override
+				public void onClick(AjaxRequestTarget target) {
+					getModelObject().delete();
+					setResponsePage(HomePage.class);
+				}
+			};
+			delete.add(red);
+			delete.setBody(Model.of("Delete"));
+			v.add(delete);
+			
+			AjaxFallbackLink<Book> give = new AjaxFallbackLink<Book>(v.newChildId(), rowModel){
+				private static final long serialVersionUID = 1L;
+				@Override
+				public void onClick(AjaxRequestTarget target) {
+					showGivePanel(target, getModelObject());
+				}
+			};
+			give.add(blue);
+			give.setBody(Model.of("Give"));
+			v.add(give);
+			
+			//handle adding the upload/download link.
+			if (!rowModel.getObject().isUploaded() && rowModel.getObject().getRelPath() == null){
+				//Item has no file.
+				AjaxFallbackLink<Book> upload = new AjaxFallbackLink<Book>(v.newChildId(), rowModel) {
 					private static final long serialVersionUID = 1L;
-
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						getModelObject().removeBorrow();
-						setResponsePage(HomePage.class);
+						showUploadPanel(target, getModel());
 					}
 				};
-				returnLink.setModel(item.getModel());
- 
-				item.add(returnLink);			
+				upload.add(white);
+				upload.setBody(Model.of("Upload"));
+				v.add(upload);
+			}else if (!rowModel.getObject().isUploaded()){
+				//Item's file is currently uploading.
+				Label uploading = new Label(v.newChildId(), "Uploading");
+				uploading.add(white);
+				v.add(uploading);
+			}else{
+				//Item's file is uploaded.
+				DownloadLink dl = rowModel.getObject().makeDownloadLink(v.newChildId());
+				if (dl != null){
+					dl.setBody(Model.of("Download"));
+					dl.add(white);
+					v.add(dl);
+				}
 			}
-		};
-		borrowedBooksView.setOutputMarkupId(true);
-		add(borrowedBooksView);
+			cellItem.add(v);
+		}
+	}
 		
-		final ListView<Book> lentBooksView =
-				new ListView<Book>("lentBooks", userLentBooks){
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected void populateItem(final ListItem<Book> item) {
-				//add title
-				item.add(new Label("title", new PropertyModel<Book>(item.getModel(), "bookInfo.title")));
-				//add the borrower
-				LDAPUser borrower = item.getModelObject().getPossessor(Calendar.getInstance());
-				item.add(new Label("borrower", new PropertyModel<LDAPUser>(borrower, "uid")));
-				AjaxFallbackLink<Book> returnLink = new AjaxFallbackLink<Book>("return"){
-					private static final long serialVersionUID = 1L;
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						getModelObject().removeBorrow();
-						setResponsePage(HomePage.class);
-					}
-				};
-				returnLink.setModel(item.getModel());
-
-				item.add(returnLink);		
-
-			}
-		};
-		lentBooksView.setOutputMarkupId(true);
-		add(lentBooksView);
-
+	private class ReturnBookPopulator implements ICellPopulator<Book>{
+		private static final long serialVersionUID = 1L;
+		@Override
+		public void detach() {}
+		@Override
+		public void populateItem(Item<ICellPopulator<Book>> cellItem,
+				String componentId, IModel<Book> rowModel) {
+			AjaxFallbackLink<Book> returnLink = new AjaxFallbackLink<Book>(componentId, rowModel){
+				private static final long serialVersionUID = 1L;
+				@Override
+				public void onClick(AjaxRequestTarget target) {
+					getModelObject().removeBorrow();
+					setResponsePage(HomePage.class);
+				}
+			};
+			returnLink.add(AttributeModifier.replace("class", "mini ui blue button"));
+			returnLink.setBody(Model.of("Return"));
+			cellItem.add(returnLink);
+		}
 	}
 }

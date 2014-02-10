@@ -3,52 +3,36 @@ package edu.rit.csh.pages;
 import java.util.List;
 
 import org.apache.wicket.AttributeModifier;
-import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.repeater.RepeatingView;
-import org.apache.wicket.model.Model;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import edu.rit.csh.auth.UserWebSession;
+import edu.rit.csh.components.AddBookPanel;
 import edu.rit.csh.components.BookActionFactory;
+import edu.rit.csh.components.ImagePanel;
 import edu.rit.csh.components.RequestBookPanel;
-import edu.rit.csh.models.Book;
 import edu.rit.csh.models.BookInfo;
 
 public class PublicSearchResultsPage extends PageTemplate {
 	private static final long serialVersionUID = 1L;
 	
 	public class AddBookActionFactory implements BookActionFactory{
+		private static final long serialVersionUID = 1L;
 		@Override
-		public RepeatingView getActions(String id, final BookInfo b) {
-			RepeatingView actions = new RepeatingView(id);
-			Form<Void> addBook = new Form<Void>(actions.newChildId()){
-				private static final long serialVersionUID = 1L;
-				@Override
-				protected void onSubmit(){
-					super.onSubmit();
-					setResponsePage(HomePage.class);
-					//Create and persist book.
-					UserWebSession session = (UserWebSession)Session.get();
-					Book.createBook(b.getIsbn(), session.getUser().getUidnumber());
-				}
-			};
-			actions.add(addBook);
-			return actions;
+		public WebMarkupContainer getActions(String id, final IModel<BookInfo> b) {
+			return new AddBookPanel(id, b);
 		}
 	}
 	
 	public class RequestBookActionFactory implements BookActionFactory{
+		private static final long serialVersionUID = 1L;
 		@Override
-		public RepeatingView getActions(String id, final BookInfo b) {
-			RepeatingView actions = new RepeatingView(id);
-			actions.add(new RequestBookPanel(actions.newChildId(), Model.of(b)));
-			return actions;
+		public WebMarkupContainer getActions(String id, final IModel<BookInfo> b) {
+			return new RequestBookPanel(id, b);
 		}
 	}
 
@@ -86,12 +70,9 @@ public class PublicSearchResultsPage extends PageTemplate {
 					item.add(new Label("description", new PropertyModel<BookInfo>(item.getModel(), "description")));
 
 					//Add image
-					WebMarkupContainer img = new WebMarkupContainer("img");
-					img.add(AttributeModifier.replace("src", 
-							new PropertyModel<BookInfo>(item.getModel(), "thumbnailURL")));
-					item.add(img);
+					item.add(new ImagePanel("img", item.getModelObject().getThumbnailURL()));
 					//Add Book Actions
-					item.add(actionFact.getActions("actions", item.getModelObject()));
+					item.add(actionFact.getActions("actions", item.getModel()));
 				}
 
 				@Override

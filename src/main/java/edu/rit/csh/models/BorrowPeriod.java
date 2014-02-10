@@ -2,6 +2,10 @@ package edu.rit.csh.models;
 
 import java.io.Serializable;
 import java.util.Calendar;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -10,9 +14,15 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.CallbackException;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
+import org.hibernate.classic.Lifecycle;
+
+import edu.rit.csh.Resources;
+import edu.rit.csh.auth.LDAPUser;
 
 @Entity
 @Table(name = "BORROWPERIODS")

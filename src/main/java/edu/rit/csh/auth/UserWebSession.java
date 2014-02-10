@@ -5,6 +5,7 @@ import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.wicket.protocol.http.WebSession;
 import org.apache.wicket.request.Request;
 
+import edu.rit.csh.Resources;
 import edu.rit.csh.WicketApplication;
 /**
  * A Websession that holds an LDAP user. 
@@ -25,7 +26,7 @@ public class UserWebSession extends WebSession {
 	public void setUser(String uid){
 		LDAPUser dummyUser;
 		try {
-			dummyUser = WicketApplication.getWicketApplication().getLDAPProxy().getUser(uid);
+			dummyUser = Resources.ldapProxy.getUser(uid);
 			if (dummyUser != null){
 				setUser(dummyUser);
 				System.out.printf("User set to %s: %s\n", uid, user.getGivenname());	

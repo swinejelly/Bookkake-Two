@@ -14,8 +14,7 @@ import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.CompoundPropertyModel;
 
-import edu.rit.csh.WicketApplication;
-import edu.rit.csh.auth.LDAPProxy;
+import edu.rit.csh.Resources;
 import edu.rit.csh.auth.LDAPUser;
 import edu.rit.csh.auth.UserWebSession;
 import edu.rit.csh.models.Book;
@@ -34,7 +33,7 @@ public class GiveBookForm extends Form<Book> {
 		setDefaultModel(new CompoundPropertyModel<GiveBookForm>(this));
 		
 		List<LDAPUser> users;
-		users = WicketApplication.getWicketApplication().getLDAPProxy().getActiveUsers();
+		users = Resources.ldapProxy.getActiveUsers();
 		String userId = ((UserWebSession)getSession()).getUser().getUidnumber();
 		//remove the authenticated user from the list.
 		for (int i = 0; i < users.size(); i++){
@@ -53,10 +52,9 @@ public class GiveBookForm extends Form<Book> {
 	
 	@Override
 	public void onSubmit(){
-		LDAPProxy proxy = WicketApplication.getWicketApplication().getLDAPProxy();
 		LDAPUser recipient;
 		try {
-			recipient = proxy.getUserByUsername(username);
+			recipient = Resources.ldapProxy.getUserByUsername(username);
 		} catch (LdapException | CursorException e) {
 			e.printStackTrace();
 			return;

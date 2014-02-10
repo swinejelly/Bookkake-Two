@@ -19,6 +19,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import edu.rit.csh.Resources;
 import edu.rit.csh.WicketApplication;
 import edu.rit.csh.googlebooks.GoogleBookAPIQuery;
 import edu.rit.csh.googlebooks.GoogleBookISBNQuery;
@@ -28,10 +29,6 @@ import edu.rit.csh.googlebooks.QueryExecutor;
 @Table(name="BOOKINFOS")
 public class BookInfo implements Serializable{
 	private static final long serialVersionUID = 1L;
-	private static SessionFactory sessFact;
-	public static void setSessFact(SessionFactory fact){
-		sessFact = fact;
-	}
 	private String isbn = "";
 	private String title = "";
 	private String publisher = "";
@@ -89,7 +86,7 @@ public class BookInfo implements Serializable{
 	 * @return the BookInfo if retrievable, else null.
 	 */
 	public static BookInfo getBookInfo(String isbn){
-		Session sess = sessFact.openSession();
+		Session sess = Resources.sessionFactory.openSession();
 		sess.beginTransaction();
 		//Get the BookInfo from the database, if that fails try to get it
 		//from google books API and persist it.
@@ -126,8 +123,8 @@ public class BookInfo implements Serializable{
 	public static List<BookInfo> searchBooks(String title, String author, int cap){
 		List<BookInfo> books = new ArrayList<BookInfo>();
 		
-		GoogleBookAPIQuery qry = WicketApplication.getWicketApplication()
-				.authGoogleBooksQuery();
+		GoogleBookAPIQuery qry = new GoogleBookAPIQuery();
+		qry.setAPIKey(Resources.googleBooksApiKey);
 		qry.setTitle(title);
 		if (author != null && !author.isEmpty()){
 			qry.setAuthor(author);
@@ -157,7 +154,7 @@ public class BookInfo implements Serializable{
 	}
 	
 	public static List<BookInfo> getAllBookInfos(){
-		Session sess = WicketApplication.getWicketApplication().getSessionFactory().openSession();
+		Session sess = Resources.sessionFactory.openSession();
 		sess.beginTransaction();
 		@SuppressWarnings("unchecked")
 		List<BookInfo> books = sess.createCriteria(BookInfo.class).list();
