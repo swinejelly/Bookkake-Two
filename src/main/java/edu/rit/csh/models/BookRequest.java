@@ -37,8 +37,8 @@ import edu.rit.csh.auth.LDAPUser;
 public class BookRequest implements Serializable, Lifecycle {
 	private static final long serialVersionUID = 1L;
 	private Long id;
-	/**Uidnumber of the user*/
-	private String requesterUID;
+	/**entryUUID of the user*/
+	private String requesterEntryUUID;
 	/**Actual LDAPUser that made the request*/
 	@Transient
 	public LDAPUser requester;
@@ -51,16 +51,16 @@ public class BookRequest implements Serializable, Lifecycle {
 		
 	}
 	
-	public BookRequest(String isbn, String requesterUID, Calendar end){
+	public BookRequest(String isbn, String requesterEntryUUID, Calendar end){
 		setBookInfo(BookInfo.getBookInfo(isbn));
-		this.setRequesterUID(requesterUID);
+		this.setRequesterEntryUUID(requesterEntryUUID);
 		setEnd(end);
 	}
 	
-	public static BookRequest createBookRequest(String isbn, String requesterUID, Calendar end){
+	public static BookRequest createBookRequest(String isbn, String requesterEntryUUID, Calendar end){
 		Session sess = Resources.sessionFactory.openSession();
 		sess.beginTransaction();
-		BookRequest br = new BookRequest(isbn, requesterUID, end);
+		BookRequest br = new BookRequest(isbn, requesterEntryUUID, end);
 		sess.save(br);
 		sess.getTransaction().commit();
 		sess.close();
@@ -88,12 +88,12 @@ public class BookRequest implements Serializable, Lifecycle {
 		this.id = id;
 	}
 
-	public String getRequesterUID() {
-		return requesterUID;
+	public String getRequesterEntryUUID() {
+		return requesterEntryUUID;
 	}
 
-	public void setRequesterUID(String uidnumber) {
-		this.requesterUID = uidnumber;
+	public void setRequesterEntryUUID(String entryUUID) {
+		this.requesterEntryUUID = entryUUID;
 	}
 
 	@OneToOne(optional = false, cascade = {CascadeType.PERSIST})
@@ -132,7 +132,7 @@ public class BookRequest implements Serializable, Lifecycle {
 	public void onLoad(Session s, Serializable id) {
 		Callable<LDAPUser> future = new Callable<LDAPUser>(){
 			public LDAPUser call() throws Exception {
-				return Resources.ldapProxy.getUser(requesterUID);
+				return Resources.ldapProxy.getUser(requesterEntryUUID);
 			}
 		};
 		try {

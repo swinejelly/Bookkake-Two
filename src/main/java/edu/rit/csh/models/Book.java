@@ -64,7 +64,7 @@ public class Book implements Serializable, Lifecycle{
 	
 	private String isbn;
 	
-	private String ownerUID;
+	private String ownerEntryUUID;
 	
 	@Transient
 	public LDAPUser owner;
@@ -83,9 +83,9 @@ public class Book implements Serializable, Lifecycle{
 		
 	}
 	
-	public Book(String isbn, String uid){
+	public Book(String isbn, String entryUUID){
 		this.setIsbn(isbn);
-		this.setOwnerUID(uid);
+		this.setOwnerEntryUUID(entryUUID);
 		bookInfo = BookInfo.getBookInfo(isbn);
 	}
 	
@@ -96,12 +96,12 @@ public class Book implements Serializable, Lifecycle{
 	 * @param isbn isbn of the book. must be an exact match.
 	 * @return A book if found, else null.
 	 */
-	public static Book getBook(String isbn, String ownerUID){
+	public static Book getBook(String isbn, String entryUUID){
 		Session sess = Resources.sessionFactory.openSession();
 		sess.beginTransaction();
-		Query qry = sess.createQuery("from Book where isbn = :isbn and ownerUID = :uid");
+		Query qry = sess.createQuery("from Book where isbn = :isbn and ownerEntryUUID = :entryUUID");
 		qry.setParameter("isbn", isbn);
-		qry.setParameter("uid", ownerUID);
+		qry.setParameter("entryUUID", entryUUID);
 		Book b = (Book) qry.uniqueResult();
 		sess.close();
 		return b;
@@ -110,12 +110,12 @@ public class Book implements Serializable, Lifecycle{
 	/**
 	 * Creates a book.
 	 * @param isbn ISBN code
-	 * @param ownerUID LDAP UID of the user.
+	 * @param entryUUID LDAP entryUUID of the user.
 	 */
-	public static Book createBook(String isbn, String ownerUID){
+	public static Book createBook(String isbn, String entryUUID){
 		Session sess = Resources.sessionFactory.openSession();
 		sess.beginTransaction();
-		Book b = new Book(isbn, ownerUID);
+		Book b = new Book(isbn, entryUUID);
 		sess.save(b);
 		sess.getTransaction().commit();
 		sess.close();
@@ -123,16 +123,16 @@ public class Book implements Serializable, Lifecycle{
 	}
 	
 	/**
-	 * Returns all books returned by the user with UIDnumber ownerUID.
+	 * Returns all books returned by the user identified by entryUUID
 	 * App must be running.
-	 * @param ownerUID UIDnumber of the user.
+	 * @param entryUUID of the user.
 	 * @return list of all books owned (regardless of possession) by the user.
 	 */
-	public static List<Book> getOwnedBooks(String ownerUID){
+	public static List<Book> getOwnedBooks(String entryUUID){
 		Session sess = Resources.sessionFactory.openSession();
 		sess.beginTransaction();
-		Query qry = sess.createQuery("from Book where ownerUID = :uid and active = true");
-		qry.setParameter("uid", ownerUID);
+		Query qry = sess.createQuery("from Book where ownerEntryUUID = :entryUUID and active = true");
+		qry.setParameter("entryUUID", entryUUID);
 		@SuppressWarnings("unchecked")
 		List<Book> ownedBooks = qry.list();
 		sess.close();
@@ -140,12 +140,12 @@ public class Book implements Serializable, Lifecycle{
 	}
 	
 	/**
-	 * Return all books belonging to the user possessorUID and not being borrowed
-	 * or that are currently being borrowed by possessorUID.
+	 * Return all books belonging to the user entryUUID and not being borrowed
+	 * or that are currently being borrowed by entryUUID.
 	 * @return list of all books possessed by user.
 	 */
-	public static List<Book> getPossessedBooks(String possessorUID){
-		return getPossessedBooks(possessorUID, Calendar.getInstance());
+	public static List<Book> getPossessedBooks(String entryUUID){
+		return getPossessedBooks(entryUUID, Calendar.getInstance());
 	}
 	
 	/**
@@ -153,34 +153,34 @@ public class Book implements Serializable, Lifecycle{
 	 * being borrowed by possessorUID at time when.
 	 * @return list of all books possessed by user.
 	 */
-	public static List<Book> getPossessedBooks(String possessorUID, Calendar when){
+	public static List<Book> getPossessedBooks(String entryUUID, Calendar when){
 		Session sess = Resources.sessionFactory.openSession();
 		sess.beginTransaction();
 		//List<Book> possessedBooks = getPossessedBooks(sess, when, possessorUID);
-		Query qry = sess.createQuery("from Book where (ownerUID = :uid or borrowPeriod != null) and active = true");
-		qry.setParameter("uid", possessorUID);
+		Query qry = sess.createQuery("from Book where (ownerEntryUUID = :entryUUID or borrowPeriod != null) and active = true");
+		qry.setParameter("entryUUID", entryUUID);
 		@SuppressWarnings("unchecked")
 		List<Book> possessedBooks = qry.list();
 		Iterator<Book> iter = possessedBooks.iterator();
 		while (iter.hasNext()){
 			Book b = iter.next();
-			if (b.getOwnerUID().equals(possessorUID) && b.borrowPeriod == null){
-				//Book belongs to possessorUID and has no associated BorrowPeriod
+			if (b.getOwnerEntryUUID().equals(entryUUID) && b.borrowPeriod == null){
+				//Book belongs to entryUUID and has no associated BorrowPeriod
 				continue;
-			}else if (b.getOwnerUID().equals(possessorUID) && b.borrowPeriod != null){
+			}else if (b.getOwnerEntryUUID().equals(entryUUID) && b.borrowPeriod != null){
 				//if the book has an associated BorrowPeriod we need to verify that
 				//the book is not currently lent out.
 				if (b.getBorrowPeriod().overlaps(when)){
 					iter.remove();
 				}
-			}else if (!b.getOwnerUID().equals(possessorUID) && b.borrowPeriod.getBorrowerUID().equals(possessorUID)){
-				//if the book does not belong to possessorUID (implying it has a BorrowPeriod)
+			}else if (!b.getOwnerEntryUUID().equals(entryUUID) && b.borrowPeriod.getBorrowerEntryUUID().equals(entryUUID)){
+				//if the book does not belong to entryUUID (implying it has a BorrowPeriod)
 				//then we should include it if it coincides with b.borrowPeriod
 				if (!b.getBorrowPeriod().overlaps(when)){
 					iter.remove();
 				}
 			}else{
-				//book neither belongs to possessorUID nor has a BorrowPeriod by possessorUID
+				//book neither belongs to entryUUID nor has a BorrowPeriod by entryUUID
 				iter.remove();
 			}
 		}
@@ -193,17 +193,17 @@ public class Book implements Serializable, Lifecycle{
 	 * @return list of all books borrowable by user.
 	 */
 	@SuppressWarnings("unchecked")
-	public static List<Book> getUnpossessedBooks(String possessorUID){
+	public static List<Book> getUnpossessedBooks(String entryUUID){
 		Session sess = Resources.sessionFactory.openSession();
 		sess.beginTransaction();
 		
-		Query qry = sess.createQuery("from Book where ownerUID != :uid and active = true");
-		qry.setParameter("uid", possessorUID);
+		Query qry = sess.createQuery("from Book where ownerEntryUUID != :entryUUID and active = true");
+		qry.setParameter("entryUUID", entryUUID);
 		List<Book> books = qry.list();
 		Iterator<Book> iter = books.iterator();
 		while (iter.hasNext()){
 			Book b = iter.next();
-			if (b.borrowPeriod != null && b.borrowPeriod.getBorrowerUID().equals(possessorUID) &&
+			if (b.borrowPeriod != null && b.borrowPeriod.getBorrowerEntryUUID().equals(entryUUID) &&
 					b.borrowPeriod.overlaps(Calendar.getInstance())){
 				iter.remove();
 			}
@@ -241,14 +241,14 @@ public class Book implements Serializable, Lifecycle{
 	}
 	
 	/**
-	 * borrowerUID borrows a book from begin to end.
+	 * entryUUID borrows a book from begin to end.
 	 */
-	public void borrow(String borrowerUID, Calendar begin, Calendar end){
+	public void borrow(String entryUUID, Calendar begin, Calendar end){
 		Session sess = Resources.sessionFactory.openSession();
 		sess.beginTransaction();
 		sess.update(this);
 		borrowPeriod = new BorrowPeriod();
-		borrowPeriod.setBorrowerUID(borrowerUID);
+		borrowPeriod.setBorrowerEntryUUID(entryUUID);
 		borrowPeriod.setBegin(begin);
 		borrowPeriod.setEnd(end);
 		borrowPeriod.setBook(this);
@@ -278,7 +278,7 @@ public class Book implements Serializable, Lifecycle{
 		Session sess = Resources.sessionFactory.openSession();
 		sess.beginTransaction();
 		sess.update(this);
-		ownerUID = newOwner;
+		ownerEntryUUID = newOwner;
 		sess.save(this);
 		sess.getTransaction().commit();
 		sess.close();
@@ -358,12 +358,12 @@ public class Book implements Serializable, Lifecycle{
 		this.isbn = isbn;
 	}
 
-	public String getOwnerUID() {
-		return ownerUID;
+	public String getOwnerEntryUUID() {
+		return ownerEntryUUID;
 	}
 
-	private void setOwnerUID(String ownerUID) {
-		this.ownerUID = ownerUID;
+	private void setOwnerEntryUUID(String entryUUID) {
+		this.ownerEntryUUID = entryUUID;
 	}
 	
 	@OneToOne(optional = true)
@@ -393,7 +393,7 @@ public class Book implements Serializable, Lifecycle{
 	public LDAPUser getPossessor(Calendar date){
 		try{
 			if (borrowPeriod != null && borrowPeriod.overlaps(date)){
-				return Resources.ldapProxy.getUser(borrowPeriod.getBorrowerUID());
+				return Resources.ldapProxy.getUser(borrowPeriod.getBorrowerEntryUUID());
 			}else{
 				return owner;
 			}
@@ -532,7 +532,7 @@ public class Book implements Serializable, Lifecycle{
 	public void onLoad(Session s, Serializable id) {
 		Callable<LDAPUser> future = new Callable<LDAPUser>(){
 			public LDAPUser call() throws Exception {
-				return Resources.ldapProxy.getUser(ownerUID);
+				return Resources.ldapProxy.getUser(ownerEntryUUID);
 			}
 		};
 		try {

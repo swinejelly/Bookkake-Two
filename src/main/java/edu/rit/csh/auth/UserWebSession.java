@@ -23,15 +23,15 @@ public class UserWebSession extends WebSession {
 		return user;
 	}
 	
-	public void setUser(String uid){
+	public void setUser(String entryUUID){
 		LDAPUser dummyUser;
 		try {
-			dummyUser = Resources.ldapProxy.getUser(uid);
+			dummyUser = Resources.ldapProxy.getUser(entryUUID);
 			if (dummyUser != null){
 				setUser(dummyUser);
-				System.out.printf("User set to %s: %s\n", uid, user.getGivenname());	
+				System.out.printf("User set to %s: %s\n", entryUUID, user.getGivenname());	
 			}else{
-				System.out.printf("User %s could not be found\n", uid);
+				System.out.printf("User %s could not be found\n", entryUUID);
 			}
 		} catch (LdapException | CursorException e) {
 			e.printStackTrace();

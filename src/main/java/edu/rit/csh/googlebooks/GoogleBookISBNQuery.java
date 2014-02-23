@@ -5,14 +5,20 @@ public class GoogleBookISBNQuery implements APIQuery {
 			"https://www.googleapis.com/books/v1/volumes?q=isbn:";
 	
 	private String isbn;
+	/**API key for google books*/
+	private String apiKey;
 	
-	public GoogleBookISBNQuery(String isbn){
+	public GoogleBookISBNQuery(String isbn, String apiKey){
 		setIsbn(isbn);
+		this.apiKey = apiKey;
 	}
 
 	@Override
 	public String getRequest() {
-		return baseURL + isbn;
+		if (apiKey.isEmpty()){
+			throw new IllegalStateException("No API key provided!");
+		}
+		return baseURL + isbn + "&key=" + apiKey;
 	}
 
 	public String getIsbn() {

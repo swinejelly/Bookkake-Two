@@ -29,8 +29,8 @@ public class SearchOwnedBookForm extends Form<SearchOwnedBookForm> {
 	public SearchOwnedBookForm(String id) {
 		super(id);
 		setDefaultModel(new CompoundPropertyModel<SearchOwnedBookForm>(this));
-		String uidNumber = ((UserWebSession)this.getWebSession()).getUser().getUidnumber();
-		List<Book> unownedBooks = Book.getUnpossessedBooks(uidNumber);
+		String entryUUID = ((UserWebSession)this.getWebSession()).getUser().getEntryUUID();
+		List<Book> unownedBooks = Book.getUnpossessedBooks(entryUUID);
 		bookInfos = new ArrayList<>(unownedBooks.size());
 		for (Book b: unownedBooks){
 			bookInfos.add(b.getBookInfo());

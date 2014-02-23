@@ -31,7 +31,7 @@ public class AddBookPanel extends Panel {
 			setResponsePage(HomePage.class);
 			//Create and persist book.
 			UserWebSession session = (UserWebSession)Session.get();
-			Book.createBook(getModelObject().getIsbn(), session.getUser().getUidnumber());
+			Book.createBook(getModelObject().getIsbn(), session.getUser().getEntryUUID());
 		}
 	}
 }

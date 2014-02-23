@@ -35,7 +35,7 @@ public class BorrowPeriod implements Serializable{
 
 	private long id;
 	
-	private String borrowerUID;
+	private String borrowerEntryUUID;
 	
 	private Calendar begin, end;
 	
@@ -61,12 +61,12 @@ public class BorrowPeriod implements Serializable{
 		this.id = id;
 	}
 
-	public String getBorrowerUID() {
-		return borrowerUID;
+	public String getBorrowerEntryUUID() {
+		return borrowerEntryUUID;
 	}
 
-	public void setBorrowerUID(String borrowerUID) {
-		this.borrowerUID = borrowerUID;
+	public void setBorrowerEntryUUID(String borrowerEntryUUID) {
+		this.borrowerEntryUUID = borrowerEntryUUID;
 	}
 
 	@Type(type = "calendar_date")

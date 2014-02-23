@@ -35,7 +35,7 @@ public class RequestPage extends PageTemplate {
 			}
 		});
 		columns.add(new PropertyPopulator<BookRequest>("bookInfo.title"));
-		columns.add(new PropertyPopulator<BookRequest>("requester.uid"));
+		columns.add(new PropertyPopulator<BookRequest>("requester.entryUUID"));
 		columns.add(new ICellPopulator<BookRequest>() {
 			private static final long serialVersionUID = 1L;
 			@Override

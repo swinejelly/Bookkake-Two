@@ -34,10 +34,6 @@ public class GoogleBookAPIQueryTest {
 
 	@Test
 	public void testGetRequestValid() {
-		GoogleBookAPIQuery qry1 = new GoogleBookAPIQuery();
-		qry1.setTitle("flowers");
-		assertEquals("https://www.googleapis.com/books/v1/volumes?q=flowers", qry1.getRequest());
-		
 		GoogleBookAPIQuery qry2 = new GoogleBookAPIQuery("flowers", "KEY_DFDA678");
 		assertEquals("https://www.googleapis.com/books/v1/volumes?q=flowers&key=KEY_DFDA678",
 				qry2.getRequest());

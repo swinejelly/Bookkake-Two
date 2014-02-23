@@ -46,18 +46,18 @@ public class Header extends Panel {
 	
 	public class SwitchUserForm extends Form<Void>{
 		private static final long serialVersionUID = 1L;
-		private String uid;
+		private String entryUUID;
 
 		public SwitchUserForm(String id) {
 			super(id);
-			TextField<String> uidInput = new TextField<>("uidInput", new PropertyModel<String>(this, "uid"));
-			add(uidInput);
+			TextField<String> entryUUIDInput = new TextField<>("entryUUIDInput", new PropertyModel<String>(this, "entryUUID"));
+			add(entryUUIDInput);
 		}
 		
 		@Override
 		public void onSubmit(){
 			UserWebSession sess = ((UserWebSession)this.getSession());
-			sess.setUser(uid);
+			sess.setUser(entryUUID);
 			setResponsePage(HomePage.class);
 		}
 		

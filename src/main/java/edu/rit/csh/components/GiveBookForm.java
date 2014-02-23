@@ -34,10 +34,10 @@ public class GiveBookForm extends Form<Book> {
 		
 		List<LDAPUser> users;
 		users = Resources.ldapProxy.getActiveUsers();
-		String userId = ((UserWebSession)getSession()).getUser().getUidnumber();
+		String userId = ((UserWebSession)getSession()).getUser().getEntryUUID();
 		//remove the authenticated user from the list.
 		for (int i = 0; i < users.size(); i++){
-			if (users.get(i).getUidnumber().equals(userId)){
+			if (users.get(i).getEntryUUID().equals(userId)){
 				users.remove(i);
 				break;
 			}
@@ -60,8 +60,8 @@ public class GiveBookForm extends Form<Book> {
 			return;
 		}
 		if (recipient != null){
-			String uidnum = recipient.getUidnumber();
-			book.give(uidnum);
+			String entryUUID = recipient.getEntryUUID();
+			book.give(entryUUID);
 			setResponsePage(HomePage.class);
 		}
 	}

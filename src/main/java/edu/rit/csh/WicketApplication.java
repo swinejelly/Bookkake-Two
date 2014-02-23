@@ -35,17 +35,17 @@ public class WicketApplication extends WebApplication
 	public final Session newSession(Request request, Response response){
 		UserWebSession sess = new UserWebSession(request);
 		LDAPUser user = null;;
-		String uidnum;
-		//Get the uidnum
+		String entryUUID;
+		//Get the entryUUID
 		if (usesDevelopmentConfig()){
-			uidnum = "10412";
+			entryUUID = "9df26e5c-9fb5-1031-8712-6505321e93f3";
 		}else{
 			WebRequest wRequest = (WebRequest)request;
-			uidnum = wRequest.getHeader("X-WEBAUTH-LDAP-UIDN");
+			entryUUID = wRequest.getHeader("X-WEBAUTH-LDAP-ENTRYUUID");
 		}
 		
 		try {
-			user = Resources.ldapProxy.getUser(uidnum);
+			user = Resources.ldapProxy.getUser(entryUUID);
 			sess.setUser(user);
 		} catch(LdapException | CursorException e){
 			e.printStackTrace();

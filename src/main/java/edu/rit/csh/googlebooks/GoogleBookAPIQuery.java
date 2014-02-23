@@ -39,6 +39,8 @@ public class GoogleBookAPIQuery implements APIQuery {
 	public String getRequest(){
 		if (title.isEmpty()){
 			throw new IllegalStateException("Title is empty");
+		}else if (APIKey.isEmpty()){
+			throw new IllegalStateException("No API key provided.");
 		}else{
 			StringBuilder urlBuilder = new StringBuilder(baseURL);
 			try{
@@ -47,10 +49,8 @@ public class GoogleBookAPIQuery implements APIQuery {
 					urlBuilder.append("+inauthor:");
 					urlBuilder.append(URLEncoder.encode(author, "UTF-8"));
 				}
-				if (!APIKey.isEmpty()){
-					urlBuilder.append("&key=");
-					urlBuilder.append(URLEncoder.encode(APIKey, "UTF-8"));
-				}
+				urlBuilder.append("&key=");
+				urlBuilder.append(URLEncoder.encode(APIKey, "UTF-8"));
 				return urlBuilder.toString();
 			}catch (UnsupportedEncodingException e){
 				throw new AssertionError("UTF-8 is unknown");

@@ -21,19 +21,19 @@ public class LDAPUser implements Serializable{
 	private boolean onfloor;
 	/**Whether a member is active*/
 	private boolean active;
-	/**Unique identifier number*/
-	private String uidnumber;
+	/**Unique identifier code*/
+	private String entryUUID;
 	/**Current room number*/
 	private String roomnumber;
 	
 	public LDAPUser(String uid, String givenname, String commonname, boolean onfloor,
-			boolean active, String uidnumber, String roomnumber) {
+			boolean active, String entryUUID, String roomnumber) {
 		this.uid = uid;
 		this.givenname = givenname;
 		this.commonname = commonname;
 		this.onfloor = onfloor;
 		this.active = active;
-		this.uidnumber = uidnumber;
+		this.entryUUID = entryUUID;
 		this.roomnumber = roomnumber;
 	}
 
@@ -77,12 +77,12 @@ public class LDAPUser implements Serializable{
 		this.active = active;
 	}
 
-	public String getUidnumber() {
-		return uidnumber;
+	public String getEntryUUID() {
+		return entryUUID;
 	}
 
-	public void setUidnumber(String uidnumber) {
-		this.uidnumber = uidnumber;
+	public void setEntryUUID(String entryUUID) {
+		this.entryUUID = entryUUID;
 	}
 
 	public String getRoomnumber() {

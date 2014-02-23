@@ -54,14 +54,14 @@ public class OwnedBookSearchResultsPage extends PageTemplate {
 		List<Book> activeBooks = Book.getBooksByIsbn(isbn);
 		final Map<String, LDAPUser> users = new TreeMap<>();
 		for (Book b: activeBooks){
-			if (!users.containsKey(b.getOwnerUID())){
-				users.put(b.getOwnerUID(), b.owner);
+			if (!users.containsKey(b.getOwnerEntryUUID())){
+				users.put(b.getOwnerEntryUUID(), b.owner);
 			}
 		}
 		final LDAPUser user = ((UserWebSession)this.getSession()).getUser();
 		
 		//Remove all books owned or possessed by the user.
-		List<Book> unpossessedBooks = Book.getUnpossessedBooks(user.getUidnumber());
+		List<Book> unpossessedBooks = Book.getUnpossessedBooks(user.getEntryUUID());
 		activeBooks.retainAll(unpossessedBooks);
 		
 		add(new ListView<Book>("book", activeBooks) {
@@ -71,10 +71,10 @@ public class OwnedBookSearchResultsPage extends PageTemplate {
 			protected void populateItem(ListItem<Book> item) {
 				Book b = item.getModelObject();
 				Calendar now = Calendar.getInstance();
-				String ownerUID = b.getOwnerUID();
+				String ownerEntryUUID = b.getOwnerEntryUUID();
 				LDAPUser possessor = b.getPossessor(now);
-				item.add(new Label("owner", new PropertyModel<Object>(users.get(b.getOwnerUID()), "givenname")));
-				boolean borrowed = !ownerUID.equals(possessor.getUidnumber());
+				item.add(new Label("owner", new PropertyModel<Object>(users.get(b.getOwnerEntryUUID()), "givenname")));
+				boolean borrowed = !ownerEntryUUID.equals(possessor.getEntryUUID());
 				if (!borrowed){
 					item.add(new Label("status", "Owned by " + possessor.getUid()));
 				}else{
@@ -141,8 +141,8 @@ public class OwnedBookSearchResultsPage extends PageTemplate {
 			Calendar end = Calendar.getInstance();
 			end.setTime(date);
 			UserWebSession sess = (UserWebSession)this.getSession();
-			String uid = sess.getUser().getUidnumber();
-			b.borrow(uid, begin, end);
+			String entryUUID = sess.getUser().getEntryUUID();
+			b.borrow(entryUUID, begin, end);
 		}
 	}
 }

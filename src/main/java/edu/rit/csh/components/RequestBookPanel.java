@@ -48,8 +48,8 @@ public class RequestBookPanel extends Panel {
 			Calendar end = Calendar.getInstance();
 			end.setTime(date);
 			UserWebSession sess = (UserWebSession)this.getSession();
-			String uid = sess.getUser().getUidnumber();
-			BookRequest.createBookRequest(b.getIsbn(), uid, end);
+			String entryUUID = sess.getUser().getEntryUUID();
+			BookRequest.createBookRequest(b.getIsbn(), entryUUID, end);
 		}
 	}
 }

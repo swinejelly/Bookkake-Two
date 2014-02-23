@@ -65,11 +65,11 @@ public class HomePage extends PageTemplate {
 		
 		
 		
-		String uidNum = ((UserWebSession)getSession()).getUser().getUidnumber();
+		String entryUUID = ((UserWebSession)getSession()).getUser().getEntryUUID();
 		//List of all books OWNED by the user.
-		List<Book> userOwnedBooks = Book.getOwnedBooks(uidNum);
+		List<Book> userOwnedBooks = Book.getOwnedBooks(entryUUID);
 		//List of all books POSSESSED by the user.
-		List<Book> userPossessedBooks = Book.getPossessedBooks(uidNum);
+		List<Book> userPossessedBooks = Book.getPossessedBooks(entryUUID);
 		//List of all books OWNED AND POSSESSED by the user. Displayed.
 		//User can delete these books.
 		final List<Book> userOwnedPossessedBooks = new LinkedList<Book>(userOwnedBooks);

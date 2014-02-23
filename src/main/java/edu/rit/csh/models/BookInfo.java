@@ -92,7 +92,7 @@ public class BookInfo implements Serializable{
 		//from google books API and persist it.
 		BookInfo info = (BookInfo) sess.get(BookInfo.class, isbn);
 		if (info == null){
-			GoogleBookISBNQuery qry = new GoogleBookISBNQuery(isbn);
+			GoogleBookISBNQuery qry = new GoogleBookISBNQuery(isbn, Resources.googleBooksApiKey);
 			try {
 				JSONObject obj = QueryExecutor.retrieveJSON(qry);
 				//the relevant information is in items[0].volumeInfo in JSON

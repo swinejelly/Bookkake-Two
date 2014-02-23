@@ -55,15 +55,15 @@ public class LDAPProxy {
 	 * Attempt to fetch the user from the specified data source
 	 * (currently only CSH's schema is supported) and return
 	 * an LDAP user
-	 * @param uid the user's UID
+	 * @param entryUUID the user's entryUUID
 	 * @return LDAPUser
 	 * @throws IOException 
 	 * @throws LdapException 
 	 * @throws CursorException 
 	 */
-	public LDAPUser getUser(String uid) throws LdapException, CursorException{
+	public LDAPUser getUser(String entryUUID) throws LdapException, CursorException{
 		if (connect()){
-			EntryCursor cursor = connection.search("ou=Users,dc=csh,dc=rit,dc=edu", "(uidnumber="+uid+")", SearchScope.SUBTREE);
+			EntryCursor cursor = connection.search("ou=Users,dc=csh,dc=rit,dc=edu", "(entryUUID="+entryUUID+")", SearchScope.SUBTREE);
 			if (cursor.next()){
 				Entry entry = cursor.get();
 				return constructFromEntry(entry);
@@ -143,7 +143,7 @@ public class LDAPProxy {
 					values.get("cn"),
 					onfloor,
 					active,
-					values.get("uidnumber"),
+					values.get("entryUUID"),
 					values.get("roomnumber"));
 			return user;
 		}catch (LdapInvalidAttributeValueException err){
