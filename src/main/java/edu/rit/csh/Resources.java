@@ -19,24 +19,29 @@ public class Resources {
 	public static ThreadPoolExecutor threadExecutor;
 	
 	static {
-		sessionFactory = new Configuration().configure().buildSessionFactory();
-		threadExecutor = new ThreadPoolExecutor(2, 8, 
-				30, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(8));
-		try {
-			ldapProxy = new LDAPProxy("/ldap.properties");
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
-		try (InputStream stream = 
-				"".getClass().getResourceAsStream("/googlebooks.properties")){ 
-		Properties props = new Properties();
-		props.load(stream);
-		stream.close();
-		googleBooksApiKey = props.getProperty("key");
-		} catch (IOException e){
-			e.printStackTrace();
-			System.exit(1);
-		}
+        try {
+            sessionFactory = new Configuration().configure().buildSessionFactory();
+            threadExecutor = new ThreadPoolExecutor(2, 8,
+                    30, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(8));
+            try {
+                ldapProxy = new LDAPProxy("/ldap.properties");
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
+            try (InputStream stream =
+                         ldapProxy.getClass().getResourceAsStream("/googlebooks.properties")) {
+                Properties props = new Properties();
+                props.load(stream);
+                stream.close();
+                googleBooksApiKey = props.getProperty("key");
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            System.exit(1);
+        }
 	}
 }
