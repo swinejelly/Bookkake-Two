@@ -171,7 +171,6 @@ public class HomePage extends PageTemplate {
 	/**
 	 * Replace the action panel on the page.
 	 * @param newAction the panel to replace the action panel.
-	 * @param title The new title for the panel.
 	 */
 	private void replaceAction(AjaxRequestTarget target, WebMarkupContainer newAction){
 		newAction.setOutputMarkupId(true);

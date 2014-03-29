@@ -1,22 +1,20 @@
 package edu.rit.csh.pages;
 
 import java.io.IOException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.datetime.StyleDateConverter;
 import org.apache.wicket.datetime.markup.html.form.DateTextField;
 import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.DownloadLink;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -30,6 +28,7 @@ import edu.rit.csh.components.ImagePanel;
 import edu.rit.csh.components.ReturnDatePicker;
 import edu.rit.csh.models.Book;
 import edu.rit.csh.models.BookInfo;
+import org.apache.wicket.util.convert.IConverter;
 
 public class OwnedBookSearchResultsPage extends PageTemplate {
 	private static final long serialVersionUID = 1L;
@@ -125,24 +124,42 @@ public class OwnedBookSearchResultsPage extends PageTemplate {
 		Date date;
 		public BorrowBookForm(String id) {
 			super(id);
-			DateTextField dateField = new DateTextField("date",
+            final Button submitButton = new Button("submit");
+            submitButton.setOutputMarkupId(true);
+            add(submitButton);
+			final DateTextField dateField = new DateTextField("date",
 					new PropertyModel<Date>(this, "date"),
 					new StyleDateConverter(false));
 			dateField.add(new ReturnDatePicker());
+            dateField.add(new OnChangeAjaxBehavior() {
+                @Override
+                protected void onUpdate(AjaxRequestTarget ajaxRequestTarget) {
+                    System.out.println(dateField.getValue());
+                    IConverter<Calendar> conv = dateField.getConverter(Calendar.class);
+                    if (conv.convertToObject(dateField.getValue(), Locale.getDefault()) != null){
+                        submitButton.add(AttributeModifier.replace("class", "ui green submit button"));
+                    }else{
+                        submitButton.add(AttributeModifier.replace("class", "ui disabled green submit button"));
+                    }
+                    ajaxRequestTarget.add(submitButton);
+                }
+            });
 			add(dateField);
 			setOutputMarkupId(true);
 		}
 		
 		@Override
 		public void onSubmit(){
-			setResponsePage(HomePage.class);
-			Book b = (Book)getParent().getDefaultModelObject();
-			Calendar begin = Calendar.getInstance();
-			Calendar end = Calendar.getInstance();
-			end.setTime(date);
-			UserWebSession sess = (UserWebSession)this.getSession();
-			String uid = sess.getUser().getUidnumber();
-			b.borrow(uid, begin, end);
+            if (date != null){
+                setResponsePage(HomePage.class);
+                Book b = (Book)getParent().getDefaultModelObject();
+                Calendar begin = Calendar.getInstance();
+                Calendar end = Calendar.getInstance();
+                end.setTime(date);
+                UserWebSession sess = (UserWebSession)this.getSession();
+                String uid = sess.getUser().getUidnumber();
+                b.borrow(uid, begin, end);
+            }
 		}
 	}
 }
