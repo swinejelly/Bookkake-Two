@@ -137,7 +137,7 @@ public class HomePage extends PageTemplate {
 			}
 		});
 		lentColumns.add(new ReturnBookPopulator());
-		add(new DataGridView<Book>("rows3", lentColumns, new ListDataProvider<Book>(userBorrowedBooks)));
+		add(new DataGridView<Book>("rows3", lentColumns, new ListDataProvider<Book>(userLentBooks)));
 	}
 	
 	private void showAddPanel(AjaxRequestTarget target){
