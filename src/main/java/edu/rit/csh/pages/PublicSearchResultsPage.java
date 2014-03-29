@@ -2,6 +2,7 @@ package edu.rit.csh.pages;
 
 import java.util.List;
 
+import edu.rit.csh.wicketmodels.TextTruncateModel;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -67,7 +68,8 @@ public class PublicSearchResultsPage extends PageTemplate {
 					item.add(new Label("title",       new PropertyModel<String>(item.getModel(), "title")));
 					item.add(new Label("publisher",   new PropertyModel<String>(item.getModel(), "publisher")));
 					item.add(new Label("authors",     new PropertyModel<String>(item.getModel(), "authors")));
-					item.add(new Label("description", new PropertyModel<String>(item.getModel(), "description")));
+					item.add(new Label("description", new TextTruncateModel<String>(
+                            new PropertyModel<String>(item.getModel(), "description"), 5)));
 
 					//Add image
 					item.add(new ImagePanel("img", item.getModelObject().getThumbnailURL()));

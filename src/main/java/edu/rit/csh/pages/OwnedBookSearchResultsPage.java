@@ -3,6 +3,7 @@ package edu.rit.csh.pages;
 import java.io.IOException;
 import java.util.*;
 
+import edu.rit.csh.wicketmodels.TextTruncateModel;
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.wicket.AttributeModifier;
@@ -46,7 +47,8 @@ public class OwnedBookSearchResultsPage extends PageTemplate {
 		add(new Label("title",          new PropertyModel<String>(info, "title")));
 		add(new Label("publisher",      new PropertyModel<String>(info, "publisher")));
 		add(new Label("authors",        new PropertyModel<String>(info, "authors")));
-		add(new Label("description",    new PropertyModel<String>(info, "description")));
+		add(new Label("description",    new TextTruncateModel<String>(
+                new PropertyModel<String>(info, "description"), 5)));
 		
 		add(new ImagePanel("img", info.getThumbnailURL()));
 		
