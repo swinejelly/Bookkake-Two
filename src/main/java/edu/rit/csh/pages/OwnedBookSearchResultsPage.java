@@ -43,10 +43,10 @@ public class OwnedBookSearchResultsPage extends PageTemplate {
 		
 		BookInfo info = BookInfo.getBookInfo(isbn);
 		
-		add(new Label("title", new PropertyModel<Object>(info, "title")));
-		add(new Label("publisher", new PropertyModel<Object>(info, "publisher")));
-		add(new Label("authors", new PropertyModel<Object>(info, "authors")));
-		add(new Label("description", new PropertyModel<Object>(info, "description")));
+		add(new Label("title",          new PropertyModel<String>(info, "title")));
+		add(new Label("publisher",      new PropertyModel<String>(info, "publisher")));
+		add(new Label("authors",        new PropertyModel<String>(info, "authors")));
+		add(new Label("description",    new PropertyModel<String>(info, "description")));
 		
 		add(new ImagePanel("img", info.getThumbnailURL()));
 		
@@ -72,7 +72,7 @@ public class OwnedBookSearchResultsPage extends PageTemplate {
 				Calendar now = Calendar.getInstance();
 				String ownerUID = b.getOwnerUID();
 				LDAPUser possessor = b.getPossessor(now);
-				item.add(new Label("owner", new PropertyModel<Object>(users.get(b.getOwnerUID()), "givenname")));
+				item.add(new Label("owner", new PropertyModel<String>(users.get(b.getOwnerUID()), "givenname")));
 				boolean borrowed = !ownerUID.equals(possessor.getUidnumber());
 				if (!borrowed){
 					item.add(new Label("status", "Owned by " + possessor.getUid()));

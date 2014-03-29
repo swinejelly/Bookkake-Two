@@ -64,10 +64,10 @@ public class PublicSearchResultsPage extends PageTemplate {
 				@Override
 				protected void populateItem(ListItem<BookInfo> item) {
 					//add labels backed by property models on item.
-					item.add(new Label("title",       new PropertyModel<BookInfo>(item.getModel(), "title")));
-					item.add(new Label("publisher",   new PropertyModel<BookInfo>(item.getModel(), "publisher")));
-					item.add(new Label("authors",     new PropertyModel<BookInfo>(item.getModel(), "authors")));
-					item.add(new Label("description", new PropertyModel<BookInfo>(item.getModel(), "description")));
+					item.add(new Label("title",       new PropertyModel<String>(item.getModel(), "title")));
+					item.add(new Label("publisher",   new PropertyModel<String>(item.getModel(), "publisher")));
+					item.add(new Label("authors",     new PropertyModel<String>(item.getModel(), "authors")));
+					item.add(new Label("description", new PropertyModel<String>(item.getModel(), "description")));
 
 					//Add image
 					item.add(new ImagePanel("img", item.getModelObject().getThumbnailURL()));
