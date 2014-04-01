@@ -46,7 +46,6 @@ import edu.rit.csh.WicketApplication;
 import edu.rit.csh.auth.LDAPUser;
 
 @Entity
-@Table(name = "BOOKS")
 public class Book implements Serializable, Lifecycle{
 	private static final long serialVersionUID = 1L;
 	

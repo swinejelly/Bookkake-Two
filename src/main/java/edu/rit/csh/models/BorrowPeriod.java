@@ -25,7 +25,6 @@ import edu.rit.csh.Resources;
 import edu.rit.csh.auth.LDAPUser;
 
 @Entity
-@Table(name = "BORROWPERIODS")
 public class BorrowPeriod implements Serializable{
 	private static final long serialVersionUID = 1L;
 	private static SessionFactory sessFact;

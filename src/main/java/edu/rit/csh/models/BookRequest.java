@@ -26,7 +26,6 @@ import edu.rit.csh.Resources;
 import edu.rit.csh.auth.LDAPUser;
 
 @Entity
-@Table(name = "BOOKREQUESTS")
 /**
  * Entity representing a general request to borrow a book.
  * Anyone who has the book on the website can fulfill it automatically

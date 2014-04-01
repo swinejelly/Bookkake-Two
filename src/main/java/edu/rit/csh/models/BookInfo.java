@@ -26,7 +26,6 @@ import edu.rit.csh.googlebooks.GoogleBookISBNQuery;
 import edu.rit.csh.googlebooks.QueryExecutor;
 
 @Entity
-@Table(name="BOOKINFOS")
 public class BookInfo implements Serializable{
 	private static final long serialVersionUID = 1L;
 	private String isbn = "";
