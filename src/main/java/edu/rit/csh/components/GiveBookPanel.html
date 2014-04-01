@@ -4,10 +4,14 @@
 	</head>
 	<body>
 		<wicket:panel>
-			<h2 class="ui center aligned header">Give Book</h2>
+			<h2 class="ui center aligned header">Give Book
+                <div class="ui sub header">
+                    Bookkake will automatically display suggestions from the names of active members.
+                </div>
+            </h2>
 			<form wicket:id="giveBookForm" id="giveBookForm" method="post"
 			   class="ui form">
-				<label>Enter recipient's name or username.</label>
+				<label>Name/Username</label>
 				<input type="text" name="username" wicket:id="username">
 				<br>
 				<br>
