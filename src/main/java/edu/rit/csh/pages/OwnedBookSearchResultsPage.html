@@ -25,7 +25,8 @@
 						<tr>
 							<th>Owner</th>
 							<th>Status</th>
-							<th>Actions</th>
+							<th>Download</th>
+                            <th>Borrow</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -35,19 +36,18 @@
 							<td wicket:id="status">
 							</td>
 							<td>
-								<a wicket:id="actions" class="ui blue submit button">
-								Borrow Book!
-								</a>
-								<a wicket:id="download" class="ui white button">
-								Download
-								</a>
+                                <a wicket:id="download" class="ui white button">
+                                    Download
+                                </a>
+                            </td>
+                            <td>
 								<form wicket:id="borrowDateSelect" method="post">
 									<label>Enter when you will return this book.</label>
 									<br>
 									<input wicket:id="date" type="text" name="date">
 									<br>
 									<input wicket:id ="submit" type="submit" name="addBook" value="Borrow Book!"
-									class="ui disabled green submit button">
+									    class="ui disabled green submit button">
 								</form>
 							</td>
 						</tr>

@@ -84,26 +84,8 @@ public class OwnedBookSearchResultsPage extends PageTemplate {
 				
 				if (!borrowed){
 					final BorrowBookForm borrowForm = new BorrowBookForm("borrowDateSelect");
-					borrowForm.setVisible(false);
-					borrowForm.setOutputMarkupPlaceholderTag(true);
-					AjaxLink<Void> borrowLink = 
-							new AjaxLink<Void>("actions"){
-						private static final long serialVersionUID = 1L;
-						@Override
-						public void onClick(AjaxRequestTarget target) {
-							setVisible(false);
-							target.add(this);
-							borrowForm.setVisible(true);
-							target.add(borrowForm);
-						}
-					};
-					borrowLink.setOutputMarkupId(true);
-					item.add(borrowLink);
 					item.add(borrowForm);
 				}else{
-					WebComponent invisibleButton = new WebComponent("actions");
-					invisibleButton.setVisible(false);
-					item.add(invisibleButton);
 					WebComponent invisibleForm = new WebComponent("borrowDateSelect");
 					invisibleForm.setVisible(false);
 					item.add(invisibleForm);
