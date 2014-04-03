@@ -25,14 +25,14 @@
         <!-- Echo all executed SQL to stdout -->
         <property name="show_sql">true</property>
 
-        <!-- Drop and re-create the database schema on startup -->
-        <property name="hbm2ddl.auto">create</property>
+        <!-- Don't run hbm2ddl by default. -->
+        <property name="hbm2ddl.auto">none</property>
 
         <!-- Names the entity classes -->
         <mapping class="edu.rit.csh.models.Book"/>
         <mapping class="edu.rit.csh.models.BookInfo"/>
         <mapping class="edu.rit.csh.models.BookRequest"/>
-		<mapping class="edu.rit.csh.models.BorrowPeriod"/>
+	<mapping class="edu.rit.csh.models.BorrowPeriod"/>
     </session-factory>
 
 </hibernate-configuration>
