@@ -5,8 +5,8 @@
 	<body>
 		<wicket:panel>
 		<div class="ui menu">
-			<a class="active item" wicket:id="homeLink"><i class="home icon"></i>Home</a>
-			<a class="item" wicket:id="requestsLink"><i class="book icon"></i>Requests</a> 
+            <wicket:link><a class="active item" href="HomePage.html"><i class="home icon"></i>Home</a></wicket:link>
+            <wicket:link><a class="item" href="RequestPage.html"><i class="book icon"></i>Requests</a></wicket:link>
 			<div class="right menu">
 				<form wicket:id="switchUser" method="POST" class="item">
 					<div class="ui icon input">

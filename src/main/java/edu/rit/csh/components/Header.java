@@ -17,22 +17,7 @@ public class Header extends Panel {
 
 	public Header(String id) {
 		super(id);
-		add(new Link<Void>("homeLink"){
-			private static final long serialVersionUID = 1L;
-			@Override
-			public void onClick(){
-				setResponsePage(HomePage.class);
-			}
-		});
-		
-		add(new Link<Void>("requestsLink"){
-			private static final long serialVersionUID = 1L;
-			@Override
-			public void onClick(){
-				setResponsePage(RequestPage.class);
-			}
-		});
-		
+
 		if (Application.get().usesDevelopmentConfig()){
 			add(new SwitchUserForm("switchUser"));
 		}else{
