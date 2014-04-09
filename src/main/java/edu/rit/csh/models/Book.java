@@ -1,49 +1,25 @@
 package edu.rit.csh.models;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Serializable;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
-import javax.persistence.PostLoad;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
+import edu.rit.csh.Resources;
+import edu.rit.csh.auth.LDAPUser;
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.wicket.markup.html.link.DownloadLink;
 import org.hibernate.CallbackException;
-import org.hibernate.EmptyInterceptor;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.classic.Lifecycle;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import edu.rit.csh.Resources;
-import edu.rit.csh.WicketApplication;
-import edu.rit.csh.auth.LDAPUser;
+import javax.persistence.*;
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @Entity
 public class Book implements Serializable, Lifecycle{
@@ -120,6 +96,19 @@ public class Book implements Serializable, Lifecycle{
 		sess.close();
 		return b;
 	}
+
+    /**
+     * @return all active books.
+     */
+    public static List<Book> getBooks(){
+        Session sess = Resources.sessionFactory.openSession();
+        sess.beginTransaction();
+        Query qry = sess.createQuery("from Book where active = true");
+        @SuppressWarnings("unchecked")
+        List<Book> ownedBooks = qry.list();
+        sess.close();
+        return ownedBooks;
+    }
 	
 	/**
 	 * Returns all books returned by the user with UIDnumber ownerUID.

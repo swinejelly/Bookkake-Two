@@ -92,5 +92,4 @@ public class LDAPUser implements Serializable{
 	public void setRoomnumber(String roomnumber) {
 		this.roomnumber = roomnumber;
 	}
-
 }

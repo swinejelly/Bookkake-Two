@@ -1,8 +1,12 @@
 package edu.rit.csh.pages;
 
-import java.io.IOException;
-import java.util.*;
-
+import edu.rit.csh.auth.LDAPUser;
+import edu.rit.csh.auth.UserWebSession;
+import edu.rit.csh.components.ImagePanel;
+import edu.rit.csh.components.ReturnDatePicker;
+import edu.rit.csh.components.UserLinkPanel;
+import edu.rit.csh.models.Book;
+import edu.rit.csh.models.BookInfo;
 import edu.rit.csh.wicketmodels.DefaultModel;
 import edu.rit.csh.wicketmodels.TextTruncateModel;
 import org.apache.directory.api.ldap.model.cursor.CursorException;
@@ -10,11 +14,9 @@ import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.datetime.StyleDateConverter;
 import org.apache.wicket.datetime.markup.html.form.DateTextField;
 import org.apache.wicket.markup.html.WebComponent;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
@@ -23,14 +25,10 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-
-import edu.rit.csh.auth.LDAPUser;
-import edu.rit.csh.auth.UserWebSession;
-import edu.rit.csh.components.ImagePanel;
-import edu.rit.csh.components.ReturnDatePicker;
-import edu.rit.csh.models.Book;
-import edu.rit.csh.models.BookInfo;
 import org.apache.wicket.util.convert.IConverter;
+
+import java.io.IOException;
+import java.util.*;
 
 public class OwnedBookSearchResultsPage extends PageTemplate {
 	private static final long serialVersionUID = 1L;
@@ -77,7 +75,7 @@ public class OwnedBookSearchResultsPage extends PageTemplate {
 				Calendar now = Calendar.getInstance();
 				String ownerUID = b.getOwnerUID();
 				LDAPUser possessor = b.getPossessor(now);
-				item.add(new Label("owner", new PropertyModel<String>(users.get(b.getOwnerUID()), "givenname")));
+				item.add(new UserLinkPanel("owner", b.owner));
 				boolean borrowed = !ownerUID.equals(possessor.getUidnumber());
 				if (!borrowed){
 					item.add(new Label("status", "Owned by " + possessor.getUid()));
@@ -106,7 +104,7 @@ public class OwnedBookSearchResultsPage extends PageTemplate {
 		});
 	}
 	
-	private class BorrowBookForm extends Form<BorrowBookForm>{
+	public static class BorrowBookForm extends Form<BorrowBookForm>{
 		private static final long serialVersionUID = 1L;
 		Date date;
 		public BorrowBookForm(String id) {

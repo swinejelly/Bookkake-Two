@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:wicket="http://wicket.apache.org">
+	<head>
+	</head>
+	<body>
+		<wicket:extend>
+            <br>
+            <div class="ui segment">
+                <h1 class="ui header" wicket:id="headertitle">Header</h1>
+                <table class="ui table segment" wicket:enclosure="books">
+                    <thead>
+                    <tr>
+                        <th class="two wide">Cover</th>
+                        <th class="three wide">Info</th>
+                        <th class="five wide">Description</th>
+                        <th class="three wide">Owner</th>
+                        <th class="two wide">Borrow</th>
+                        <th class="one wide">Download</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr wicket:id="books">
+                        <td><img wicket:id="img"></img></td>
+                        <td>
+                            <h2 wicket:id="title"></h2>
+                            <h3 wicket:id="authors"></h3>
+                            <h4 wicket:id="publisher"></h4>
+                        </td>
+                        <td wicket:id="description">
+                        </td>
+                        <td>
+                            <span wicket:id="owner"></span>
+                            <wicket:enclosure child="borrower">
+                            (lent to <span wicket:id="borrower"></span>
+                            until <div wicket:id="date"></div>)</wicket:enclosure>
+                        </td>
+                        <td>
+                            <form wicket:id="borrowDateSelect" method="post">
+                                <label>Enter when you will return this book.</label>
+                                <br>
+                                <input wicket:id="date" type="text" name="date">
+                                <br>
+                                <input wicket:id ="submit" type="submit" name="addBook" value="Borrow Book!"
+                                       class="ui disabled green submit button">
+                            </form>
+                        </td>
+                        <td>
+                            <a wicket:id="download" class="ui white button">Download</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+		</wicket:extend>
+	</body>
+</html>

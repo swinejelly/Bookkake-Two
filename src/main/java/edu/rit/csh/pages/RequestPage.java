@@ -1,8 +1,9 @@
 package edu.rit.csh.pages;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-
+import edu.rit.csh.components.ImagePanel;
+import edu.rit.csh.components.SearchBookPanel;
+import edu.rit.csh.components.UserLinkPanel;
+import edu.rit.csh.models.BookRequest;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.DataGridView;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.PropertyPopulator;
@@ -11,9 +12,8 @@ import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.markup.repeater.data.ListDataProvider;
 import org.apache.wicket.model.IModel;
 
-import edu.rit.csh.components.ImagePanel;
-import edu.rit.csh.components.SearchBookPanel;
-import edu.rit.csh.models.BookRequest;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 
 public class RequestPage extends PageTemplate {
 	private static final long serialVersionUID = 1L;
@@ -35,7 +35,15 @@ public class RequestPage extends PageTemplate {
 			}
 		});
 		columns.add(new PropertyPopulator<BookRequest>("bookInfo.title"));
-		columns.add(new PropertyPopulator<BookRequest>("requester.uid"));
+		columns.add(new ICellPopulator<BookRequest>() {
+            @Override
+            public void populateItem(Item<ICellPopulator<BookRequest>> cellItem,
+                                     String componentId, IModel<BookRequest> rowModel) {
+                cellItem.add(new UserLinkPanel(componentId, rowModel.getObject().requester));
+            }
+            @Override
+            public void detach() {            }
+        });
 		columns.add(new ICellPopulator<BookRequest>() {
 			private static final long serialVersionUID = 1L;
 			@Override
