@@ -2,6 +2,7 @@ package edu.rit.csh.pages;
 
 import edu.rit.csh.auth.LDAPUser;
 import edu.rit.csh.auth.UserWebSession;
+import edu.rit.csh.components.BookStatusPanel;
 import edu.rit.csh.components.ImagePanel;
 import edu.rit.csh.components.ReturnDatePicker;
 import edu.rit.csh.components.UserLinkPanel;
@@ -76,13 +77,9 @@ public class OwnedBookSearchResultsPage extends PageTemplate {
 				String ownerUID = b.getOwnerUID();
 				LDAPUser possessor = b.getPossessor(now);
 				item.add(new UserLinkPanel("owner", b.owner));
+                item.add(new BookStatusPanel("status", item.getModel()));
 				boolean borrowed = !ownerUID.equals(possessor.getUidnumber());
-				if (!borrowed){
-					item.add(new Label("status", "Owned by " + possessor.getUid()));
-				}else{
-					item.add(new Label("status", "Borrowed by " + possessor.getUid()));
-				}
-				
+
 				if (!borrowed){
 					final BorrowBookForm borrowForm = new BorrowBookForm("borrowDateSelect");
 					item.add(borrowForm);

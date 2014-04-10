@@ -1,10 +1,8 @@
 package edu.rit.csh.pages;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-
+import edu.rit.csh.auth.UserWebSession;
+import edu.rit.csh.components.*;
+import edu.rit.csh.models.Book;
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.wicket.AttributeModifier;
@@ -25,12 +23,9 @@ import org.apache.wicket.markup.repeater.data.ListDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
-import edu.rit.csh.auth.UserWebSession;
-import edu.rit.csh.components.GiveBookPanel;
-import edu.rit.csh.components.SearchBookPanel;
-import edu.rit.csh.components.SearchOwnedBookPanel;
-import edu.rit.csh.components.UploadBookFilePanel;
-import edu.rit.csh.models.Book;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 public class HomePage extends PageTemplate {
 	private static final long serialVersionUID = 1L;
@@ -93,7 +88,7 @@ public class HomePage extends PageTemplate {
 			@Override
 			public void populateItem(Item<ICellPopulator<Book>> cellItem,
 					String componentId, IModel<Book> rowModel) {
-				cellItem.add(new Label(componentId, ""));
+                cellItem.add(new BookStatusPanel(componentId, rowModel));
 			}
 		});
 		//Action column
@@ -110,11 +105,7 @@ public class HomePage extends PageTemplate {
 			@Override
 			public void populateItem(Item<ICellPopulator<Book>> cellItem,
 					String componentId, IModel<Book> rowModel) {
-				String text = String.format("Borrowed from %s: due on %s",
-						rowModel.getObject().owner.getUid(),
-						new SimpleDateFormat("MM/dd/yyyy").format(rowModel.getObject().getBorrowPeriod().getEnd().getTime()));
-						
-				cellItem.add(new Label(componentId, text));
+				cellItem.add(new BookStatusPanel(componentId, rowModel));
 			}
 		});
 		borrowedBooksColumns.add(new ReturnBookPopulator());
@@ -130,10 +121,7 @@ public class HomePage extends PageTemplate {
 			@Override
 			public void populateItem(Item<ICellPopulator<Book>> cellItem,
 					String componentId, IModel<Book> rowModel) {
-				String text = String.format("Borrowed by %s: due on %s", 
-						rowModel.getObject().owner.getUid(),
-						new SimpleDateFormat("MM/dd/yyyy").format(rowModel.getObject().getBorrowPeriod().getEnd().getTime()));
-				cellItem.add(new Label(componentId, text));
+				cellItem.add(new BookStatusPanel(componentId, rowModel));
 			}
 		});
 		lentColumns.add(new ReturnBookPopulator());

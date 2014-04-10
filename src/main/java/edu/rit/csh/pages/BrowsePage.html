@@ -13,7 +13,7 @@
                         <th class="two wide">Cover</th>
                         <th class="three wide">Info</th>
                         <th class="five wide">Description</th>
-                        <th class="three wide">Owner</th>
+                        <th class="three wide">Status</th>
                         <th class="two wide">Borrow</th>
                         <th class="one wide">Download</th>
                     </tr>
@@ -28,11 +28,7 @@
                         </td>
                         <td wicket:id="description">
                         </td>
-                        <td>
-                            <span wicket:id="owner"></span>
-                            <wicket:enclosure child="borrower">
-                            (lent to <span wicket:id="borrower"></span>
-                            until <div wicket:id="date"></div>)</wicket:enclosure>
+                        <td wicket:id="status">
                         </td>
                         <td>
                             <form wicket:id="borrowDateSelect" method="post">

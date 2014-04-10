@@ -1,15 +1,12 @@
 package edu.rit.csh.pages;
 
-import edu.rit.csh.Resources;
 import edu.rit.csh.auth.LDAPUser;
 import edu.rit.csh.auth.UserWebSession;
+import edu.rit.csh.components.BookStatusPanel;
 import edu.rit.csh.components.ImagePanel;
-import edu.rit.csh.components.UserLinkPanel;
 import edu.rit.csh.models.Book;
 import edu.rit.csh.wicketmodels.DefaultModel;
 import edu.rit.csh.wicketmodels.TextTruncateModel;
-import org.apache.directory.api.ldap.model.cursor.CursorException;
-import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.DownloadLink;
@@ -18,7 +15,6 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 public class BrowsePage extends PageTemplate {
@@ -50,38 +46,7 @@ public class BrowsePage extends PageTemplate {
                                 new TextTruncateModel<String>(
                                         new PropertyModel<String>(b, "bookInfo.description"), 4),
                                 "No description available.")));
-                String ownerUidnum = "(user not found)", borrowerUidnum = "(user not found)";
-                WebMarkupContainer ownerLink = null, borrowerLink = null;
-                try{
-                    ownerLink = new UserLinkPanel("owner", Resources.ldapProxy.getUser(book.getOwnerUID()));
-                    if (book.getBorrowPeriod() != null){
-                        borrowerLink = new UserLinkPanel("borrower",
-                                Resources.ldapProxy.getUser(book.getBorrowPeriod().getBorrowerUID()));
-                    }
-                }catch (CursorException | LdapException e){
-
-                }
-                if (ownerLink == null){
-                    ownerLink = new WebMarkupContainer("owner");
-                    ownerLink.add(new WebMarkupContainer("ownerName"));
-                    ownerLink.setVisible(false);
-                }
-                if (borrowerLink == null){
-                    borrowerLink = new WebMarkupContainer("borrower");
-                    borrowerLink.add(new WebMarkupContainer("borrowerName"));
-                    borrowerLink.setVisible(false);
-                }
-
-                Label returnDate;
-                if (book.getBorrowPeriod() != null){
-                    returnDate = new Label("date", new SimpleDateFormat().format(book.getBorrowPeriod().getEnd().getTime()));
-                }else{
-                    returnDate = new Label("date", "");
-                    returnDate.setVisible(false);
-                }
-                item.add(ownerLink);
-                item.add(borrowerLink);
-                item.add(returnDate);
+                item.add(new BookStatusPanel("status", item.getModel()));
 
                 OwnedBookSearchResultsPage.BorrowBookForm form =
                         new OwnedBookSearchResultsPage.BorrowBookForm("borrowDateSelect");
