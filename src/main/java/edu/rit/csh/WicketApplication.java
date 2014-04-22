@@ -1,6 +1,9 @@
 package edu.rit.csh;
 
 
+import edu.rit.csh.auth.LDAPUser;
+import edu.rit.csh.auth.UserWebSession;
+import edu.rit.csh.pages.HomePage;
 import org.apache.directory.api.ldap.model.cursor.CursorException;
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.wicket.Session;
@@ -9,10 +12,6 @@ import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
 import org.apache.wicket.request.http.WebRequest;
-
-import edu.rit.csh.auth.LDAPUser;
-import edu.rit.csh.auth.UserWebSession;
-import edu.rit.csh.pages.HomePage;
 
 /**
  * Application object for your web application. If you want to run this application without deploying, run the Start class.
@@ -43,18 +42,22 @@ public class WicketApplication extends WebApplication
 			WebRequest wRequest = (WebRequest)request;
 			uidnum = wRequest.getHeader("X-WEBAUTH-LDAP-UIDN");
 		}
-		
-		try {
-			user = Resources.ldapProxy.getUser(uidnum);
-			sess.setUser(user);
-		} catch(LdapException | CursorException e){
-			e.printStackTrace();
-		}
-		sess.setUser(user);
+        //LDAP library seems to throw an exception related to
+        //its connection timing out after inactivity,
+        //which is normal. If an exception occurs or the user isn't returned,
+        //try again.
+        int ldapTries = 0, ldapTriesMax = 3;
+        while (ldapTries++ < ldapTriesMax){
+            try {
+                user = Resources.ldapProxy.getUser(uidnum);
+            } catch(LdapException | CursorException e){
+                e.printStackTrace();
+            }
+            if (user != null){
+                sess.setUser(user);
+                break;
+            }
+        }
 		return sess;
 	}
-	
-//	public static WicketApplication getWicketApplication(){
-//		return (WicketApplication)WebApplication.get();
-//	}
 }
