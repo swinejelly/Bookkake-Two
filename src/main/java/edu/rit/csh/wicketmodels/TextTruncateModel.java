@@ -33,7 +33,6 @@ public class TextTruncateModel<T extends Serializable> implements IChainingModel
         if (t != null){
             T elem = t.getObject();
             String s = t.getObject().toString();
-            System.out.println(s);
             int endIndex = nthOccurrence(s, '.', numSentences);
             if (endIndex == -1) endIndex = s.length();
             s = s.substring(0, endIndex);
